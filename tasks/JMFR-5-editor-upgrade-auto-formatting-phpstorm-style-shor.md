@@ -27,3 +27,10 @@ Upgrade the in-game code editor: auto formatting for JavaScript and Python, more
 - [ ] New buttons fit the window header, with tooltips in English and Georgian
 - [ ] Copy buttons on docs code examples and code blocks, and on the code window, copy exactly the code shown in the current language
 - [ ] With the mod's editor features off, the editor behaves as stock
+
+## Notes
+
+- Built, in game checks pending. Docs in `docs/editor.md`.
+- Deferred: the rest of the navigation workstream (rename, go to declaration, extend and shrink selection, breakpoint toggle), plus go to line, replace and block comment.
+- Dropped: multi-cursor and `Alt J` (single caret in the input field), folding, copy buttons on inline code.
+- Stock keys read from the game's `options.txt` and assets: `Ctrl Y` is `redo 2`, so delete line ships unbound and the PhpStorm preset swaps them.
