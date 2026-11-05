@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "trongio": {
+      "source": {
+        "source": "github",
+        "repo": "trongio/claude-workflow"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "workflow@trongio": true
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/trongio/claude-workflow/main/schema/workflow.schema.json",
+  "idPrefix": "JMFR",
+  "baseBranch": "main",
+  "wipLimit": 2,
+  "milestone": {
+    "label": "v1"
+  },
+  "gates": [],
+  "worktree": {
+    "link": [],
+    "copy": [],
+    "setup": []
+  },
+  "ui": false,
+  "docs": {
+    "design": []
+  },
+  "risk": {
+    "high": []
+  },
+  "overnight": {
+    "parallel": 2,
+    "model": "opus"
+  }
+}

@@ -1,0 +1,4 @@
+.workflow/
+.decompiled/
+bin/
+obj/
