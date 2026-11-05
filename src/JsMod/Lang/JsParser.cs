@@ -55,6 +55,8 @@ namespace JsMod.Lang
         private readonly List<Token> tokens;
         private readonly CodeWindow window;
         private readonly HashSet<string> allVars = new HashSet<string>();
+        private readonly HashSet<string> importedModules = new HashSet<string>();
+        private readonly HashSet<string> modules = new HashSet<string>();
         private readonly int endOfSource;
         private FunctionScope scope = new FunctionScope(null);
         private int pos;
@@ -95,7 +97,7 @@ namespace JsMod.Lang
                 ParseStatement(body, topLevel: true, functionBody: false);
                 SkipNewLines();
             }
-            return new Program(new SequenceNode(window) { slots = body }, scope.Vars, allVars, new HashSet<string>());
+            return new Program(new SequenceNode(window) { slots = body }, scope.Vars, allVars, importedModules);
         }
 
         // ---- Statements ----
@@ -134,6 +136,12 @@ namespace JsMod.Lang
                     case "continue":
                         into.Add(ParseContinue());
                         return;
+                    case "import":
+                        into.Add(ParseImport(topLevel));
+                        return;
+                    case "export":
+                        ParseExport(into, topLevel);
+                        return;
                 }
             }
             if (IsPunct(";"))
@@ -148,6 +156,132 @@ namespace JsMod.Lang
             }
             into.Add(ParseSimpleStatement());
             EndStatement();
+        }
+
+        /// <summary>Every top level name can already be imported, so export only has to be accepted.</summary>
+        private void ParseExport(List<Node> into, bool topLevel)
+        {
+            Token keyword = Next();
+            if (!topLevel)
+            {
+                throw new ParseException("'export' can only be used at the top level of a file.", keyword.startIndex, keyword.startIndex + keyword.value.Length);
+            }
+            if (!IsKeyword("function") && !IsKeyword("let") && !IsKeyword("const") && !IsKeyword("var"))
+            {
+                throw Unexpected("Expected a function or variable after 'export'");
+            }
+            ParseStatement(into, topLevel, functionBody: false);
+        }
+
+        /// <summary>
+        /// The game's own import node, so modules, drones and costs behave as in Python. Accepted forms:
+        /// import "file", import * as file from "file", import * from "file", and import { a, b } from "file".
+        /// </summary>
+        private Node ParseImport(bool topLevel)
+        {
+            Token keyword = Next();
+            int start = keyword.startIndex;
+            if (!topLevel)
+            {
+                throw new ParseException("'import' can only be used at the top level of a file.", start, start + keyword.value.Length);
+            }
+            string file;
+            Node node;
+            if (IsPunct("*"))
+            {
+                pos++;
+                if (IsContextual("as"))
+                {
+                    pos++;
+                    Token alias = ExpectIdentifier();
+                    file = ParseFromFile();
+                    if (alias.value != file)
+                    {
+                        throw new ParseException("A file must be imported under its own name, so write: import * as " + file + " from \"" + file + "\".", alias.startIndex, alias.startIndex + alias.value.Length);
+                    }
+                    node = ImportFile(file, start);
+                }
+                else
+                {
+                    file = ParseFromFile();
+                    importedModules.Add(file);
+                    node = new ImportNode(window, start, lastEnd, new List<string> { file }, unpack: true, unpackAll: true, null, isStatic: true);
+                }
+            }
+            else if (IsPunct("{"))
+            {
+                pos++;
+                var names = new List<string>();
+                groupDepth++;
+                while (!IsPunct("}"))
+                {
+                    names.Add(ExpectIdentifier().value);
+                    if (!IsPunct(","))
+                    {
+                        break;
+                    }
+                    pos++;
+                }
+                groupDepth--;
+                ExpectPunct("}");
+                file = ParseFromFile();
+                foreach (string name in names)
+                {
+                    Declare(name, isConst: false);
+                }
+                node = new ImportNode(window, start, lastEnd, new List<string> { file }, unpack: true, unpackAll: false, names, isStatic: true);
+            }
+            else if (Current != null && Current.type == JsTokenizer.Text)
+            {
+                file = ParseFileName();
+                node = ImportFile(file, start);
+            }
+            else
+            {
+                throw Unexpected("Expected a file name in quotes, '*' or '{' after 'import'");
+            }
+            EndStatement();
+            return node;
+        }
+
+        private Node ImportFile(string file, int start)
+        {
+            modules.Add(file);
+            Declare(file, isConst: false);
+            return new ImportNode(window, start, lastEnd, new List<string> { file }, unpack: false, unpackAll: false, null, isStatic: true);
+        }
+
+        private string ParseFromFile()
+        {
+            if (!IsContextual("from"))
+            {
+                throw Unexpected("Expected 'from'");
+            }
+            pos++;
+            return ParseFileName();
+        }
+
+        private string ParseFileName()
+        {
+            if (Current == null || Current.type != JsTokenizer.Text)
+            {
+                throw Unexpected("Expected a file name in quotes");
+            }
+            Token token = Next();
+            string name = token.value.Substring(1, token.value.Length - 2);
+            if (name.StartsWith("./", System.StringComparison.Ordinal))
+            {
+                name = name.Substring(2);
+            }
+            if (name.EndsWith(".js", System.StringComparison.Ordinal) || name.EndsWith(".py", System.StringComparison.Ordinal))
+            {
+                name = name.Substring(0, name.Length - 3);
+            }
+            if (name.Length == 0)
+            {
+                throw new ParseException("This file name is empty.", token.startIndex, token.startIndex + token.value.Length);
+            }
+            return name;
         }
 
         private void EndStatement()
@@ -798,7 +932,12 @@ namespace JsMod.Lang
                     }
                     Token member = Next();
                     int memberEnd = member.startIndex + member.value.Length;
-                    if (node is LiteralNode literal && literal.value is PyConstBag bag)
+                    Node alias = ParseMemberAlias(node, member);
+                    if (alias != null)
+                    {
+                        node = alias;
+                    }
+                    else if (node is LiteralNode literal && literal.value is PyConstBag bag)
                     {
                         try
                         {
@@ -811,7 +950,9 @@ namespace JsMod.Lang
                     }
                     else
                     {
-                        Node name = new ValueNode(member.value, window, member.startIndex, memberEnd);
+                        // The game's list method is called append. A module's own member keeps its name.
+                        string memberName = member.value == "push" && !IsModule(node) ? "append" : member.value;
+                        Node name = new ValueNode(memberName, window, member.startIndex, memberEnd);
                         node = new BinaryExprNode(".", TokenType.DOT, window, dot.startIndex, dot.startIndex + 1) { slots = { node, name } };
                     }
                 }
@@ -820,6 +961,98 @@ namespace JsMod.Lang
                     return node;
                 }
             }
+        }
+
+        /// <summary>
+        /// Familiar JS spellings that compile to exactly the nodes the game's own spelling gets, so they cost the same.
+        /// Returns null when the member is an ordinary one.
+        /// </summary>
+        private Node ParseMemberAlias(Node target, Token member)
+        {
+            int start = member.startIndex;
+            int end = start + member.value.Length;
+            if (target is ValueNode value && !IsDeclared(value.value))
+            {
+                if (value.value == "console" && member.value == "log")
+                {
+                    return new ValueNode("print", window, start, end);
+                }
+                if (value.value == "Math")
+                {
+                    return ParseMath(member, target.boxedParams.wordStart);
+                }
+            }
+            if (IsModule(target))
+            {
+                return null;
+            }
+            if (member.value == "length" && !IsPunct("("))
+            {
+                Node args = new SequenceNode(window) { slots = { target } };
+                return new CallNode(window, start, end) { slots = { new ValueNode("len", window, start, end), args } };
+            }
+            if ((member.value == "includes" || member.value == "has") && IsPunct("("))
+            {
+                pos++;
+                Node args = ParseSequence(")");
+                if (args.slots.Count != 1)
+                {
+                    throw new ParseException(member.value + "() takes exactly one value.", start, end);
+                }
+                return new ComparisonNode(new List<string> { "in" }, window, target.boxedParams.wordStart, lastEnd) { slots = { args.slots[0], target } };
+            }
+            return null;
+        }
+
+        private Node ParseMath(Token member, int start)
+        {
+            int end = member.startIndex + member.value.Length;
+            switch (member.value)
+            {
+                case "abs":
+                case "min":
+                case "max":
+                case "random":
+                    return new ValueNode(member.value, window, member.startIndex, end);
+                case "floor":
+                    ExpectPunct("(");
+                    Node args = ParseSequence(")");
+                    if (args.slots.Count != 1)
+                    {
+                        throw new ParseException("Math.floor() takes exactly one value.", start, end);
+                    }
+                    return Floor(args.slots[0], start, end);
+                default:
+                    throw new ParseException("Math." + member.value + " is not available here. Math has abs, floor, max, min and random.", start, end);
+            }
+        }
+
+        /// <summary>The game's floor division: Math.floor(a / b) is a // b, and Math.floor(x) is x // 1.</summary>
+        private Node Floor(Node value, int start, int end)
+        {
+            if (value is BinaryExprNode binary && binary.op == "/")
+            {
+                return new BinaryExprNode("//", TokenType.MULT, window, binary.boxedParams.wordStart, binary.boxedParams.wordEnd) { slots = { binary.slots[0], binary.slots[1] } };
+            }
+            Node one = new LiteralNode(new PyNumber(1.0), window, start, end);
+            return new BinaryExprNode("//", TokenType.MULT, window, start, end) { slots = { value, one } };
+        }
+
+        private bool IsDeclared(string name)
+        {
+            for (FunctionScope s = scope; s != null; s = s.Parent)
+            {
+                if (s.Vars.Contains(name))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool IsModule(Node node)
+        {
+            return node is ValueNode value && modules.Contains(value.value);
         }
 
         /// <summary>Comma separated expressions up to the closer, which is consumed. The opener has already been consumed.</summary>

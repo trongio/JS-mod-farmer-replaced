@@ -1,3 +1,4 @@
+using System.Linq;
 using Xunit;
 using static TestSupport;
 
@@ -190,5 +191,117 @@ public class ExecutionTests
         Assert.Equal(255, run.Number("a"));
         Assert.Equal(1000, run.Number("b"));
         Assert.Equal(0.5, run.Number("c"));
+    }
+
+    [Theory]
+    [InlineData("let a = 7; let r = Math.floor(a / 2);", "a = 7\nr = a // 2")]
+    [InlineData("let a = 7.5; let r = Math.floor(a);", "a = 7.5\nr = a // 1")]
+    [InlineData("let a = 7; let r = Math.floor(a * 0.3);", "a = 7\nr = a * 0.3 // 1")]
+    [InlineData("let a = [1]; a.push(2); let r = a.length;", "a = [1]\na.append(2)\nr = len(a)")]
+    [InlineData("let a = [1, 2]; let r = 0; if (a.includes(2)) { r = 1; }", "a = [1, 2]\nr = 0\nif 2 in a:\n    r = 1")]
+    [InlineData("let a = set(); a.add(2); let r = 0; if (a.has(2)) { r = 1; }", "a = set()\na.add(2)\nr = 0\nif 2 in a:\n    r = 1")]
+    [InlineData("let r = Math.abs(-3) + Math.max(1, 2) + Math.min(1, 2);", "r = abs(-3) + max(1, 2) + min(1, 2)")]
+    public void AliasesGiveTheSameResultAndOpsAsTheGameSpelling(string js, string py)
+    {
+        var fromJs = RunJs(js);
+        var fromPy = RunPy(py);
+        Assert.Equal(fromPy.Number("r"), fromJs.Number("r"));
+        Assert.Equal(fromPy.Ops, fromJs.Ops);
+    }
+
+    [Theory]
+    [InlineData("let r = Math.floor(5 / 2);", "r = 5 // 2")]
+    [InlineData("let a = [1]; a.push(2);", "a = [1]\na.append(2)")]
+    [InlineData("let a = [1]; let r = a.includes(1);", "a = [1]\nr = 1 in a")]
+    public void AliasesBuildTheGameTree(string js, string py)
+    {
+        Assert.Equal(Dump(ParsePy(py).syntaxTree), Dump(ParseJs(js).syntaxTree));
+    }
+
+    [Fact]
+    public void DeclaredVariablesNamedLikeAliasesStayOrdinary()
+    {
+        Assert.Equal(4, RunJs("function g() { return 4; }\nlet Math = {\"floor\": g};\nlet r = Math[\"floor\"]();").Number("r"));
+        var error = Assert.Throws<ParseException>(() => ParseJs("let r = Math.sin(1);"));
+        Assert.Contains("Math.sin", error.Message);
+    }
+
+    [Fact]
+    public void ArrayDestructuringAndSwapWork()
+    {
+        var run = RunJs("let [a, b] = [1, 2]; let [c, [d, e]] = [3, [4, 5]]; [a, b] = [b, a]; let r = a * 100 + e;");
+        Assert.Equal(205, run.Number("r"));
+    }
+
+    [Fact]
+    public void ArrayDestructuringReadsARealTuple()
+    {
+        Assert.Equal(12, JsTupleProgram().Number("r"));
+    }
+
+    private static Run JsTupleProgram()
+    {
+        // The function is defined in Python so it returns the game's real tuple, as measure() and get_companion() do.
+        var pythonDefs = ParsePy("def pair():\n    return 1, (2, 3)").syntaxTree;
+        var jsBody = ParseJs("let [a, [b, c]] = pair(); let r = a * 10 + b;").syntaxTree;
+        var both = new SequenceNode((CodeWindow)null) { slots = { pythonDefs, jsBody } };
+        return Execute(both);
+    }
+
+    [Fact]
+    public void ElseIfMatchesPythonElif()
+    {
+        Assert.Equal(
+            Dump(ParsePy("if a:\n    b()\nelif c:\n    d()\nelse:\n    e()").syntaxTree),
+            Dump(ParseJs("if (a) { b(); } else if (c) { d(); } else { e(); }").syntaxTree));
+    }
+
+    [Theory]
+    [InlineData("import \"lib\";", "import lib")]
+    [InlineData("import * as lib from \"lib\";", "import lib")]
+    [InlineData("import * from \"lib\";", "from lib import *")]
+    [InlineData("import { a, b } from \"lib\";", "from lib import a, b")]
+    [InlineData("import { a } from \"./lib.js\";", "from lib import a")]
+    public void ImportsBuildTheSameTreeAsPython(string js, string py)
+    {
+        Assert.Equal(Dump(ParsePy(py).syntaxTree), Dump(ParseJs(js).syntaxTree));
+        Assert.Equal(ParsePy(py).allVars.OrderBy(n => n), ParseJs(js).allVars.OrderBy(n => n));
+        Assert.Equal(ParsePy(py).importedModules.OrderBy(n => n), ParseJs(js).importedModules.OrderBy(n => n));
+    }
+
+    [Theory]
+    [InlineData("import * as other from \"lib\";", "other")]
+    [InlineData("import lib from \"lib\";", "lib")]
+    [InlineData("function f() { import \"lib\"; }", "import")]
+    [InlineData("if (a) { export let b = 1; }", "export")]
+    [InlineData("export 5;", "5")]
+    public void BadImportsAndExportsReportAnError(string js, string word)
+    {
+        var error = Assert.Throws<ParseException>(() => ParseJs(js));
+        string source = Marker + js;
+        Assert.Contains(word, source.Substring(error.startIndex, error.endIndex - error.startIndex));
+    }
+
+    [Fact]
+    public void ExportIsAcceptedOnDeclarations()
+    {
+        var run = RunJs("export function f() { return 2; }\nexport let a = f();\nexport const b = a + 1;");
+        Assert.Equal(3, run.Number("b"));
+    }
+
+    [Fact]
+    public void AModuleMemberNamedLikeAnAliasKeepsItsName()
+    {
+        string dump = Dump(ParseJs("import \"lib\";\nlet r = lib.length;\nlib.push(1);").syntaxTree);
+        Assert.Contains("value=length", dump);
+        Assert.Contains("value=push", dump);
+        Assert.DoesNotContain("value=len,", dump);
+    }
+
+    [Fact]
+    public void ComputedDictKeysUseTheValueNotItsName()
+    {
+        var run = RunJs("let d = {[North]: 1, \"a\": 2, b: 3}; let r = d[North] * 100 + d[\"a\"] * 10 + d[\"b\"];");
+        Assert.Equal(123, run.Number("r"));
     }
 }

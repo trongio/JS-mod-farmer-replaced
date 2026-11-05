@@ -41,7 +41,11 @@ so add `# @py` to the ones you want to keep.
 
 ## Methods and names
 
-- Use the game's names: `a.append(x)` and `len(a)`, not `a.push(x)` and `a.length`.
+- The game's names work everywhere: `a.append(x)`, `len(a)`, `print(x)`, `x in a`.
+- Familiar spellings compile to exactly the same thing and cost the same: `a.push(x)`,
+  `a.length`, `a.includes(x)`, `s.has(x)` and `console.log(x)`.
+- `Math.floor(a / b)` is the game's floor division. `Math.floor(x)`, `Math.abs`, `Math.min`,
+  `Math.max` and `Math.random` are there too, but nothing else on `Math`.
 - Names built into the game, such as `North` and `Items`, can't be reassigned. Functions
   such as `harvest` can, the same as in Python.
 
@@ -54,8 +58,33 @@ so add `# @py` to the ones you want to keep.
 
 Each of these reports an error at its position: ternary `?:`, arrow functions and function
 expressions, classes and `new`, `typeof`, `switch`, `do`, `try`, `??`, `?.`, spread, bitwise
-operators, `${}` in templates, `for...in`, regular expressions, `import` and `export`. Without
-`import`, a JavaScript file can be imported but can't import anything itself.
+operators, `${}` in templates, `for...in` and regular expressions.
+
+## Imports
+
+Imports work between files, whichever language each one is in:
+
+- `import * as lib from "lib";` then `lib.f()`. The name has to match the file. `import "lib";`
+  does the same.
+- `import { a, b } from "lib";` brings in those names.
+- `import * from "lib";` brings in every name. This form isn't real JavaScript, but the game has it.
+
+Every top level name can be imported, so `export` isn't needed. It's accepted on a function or
+variable and ignored. Imports go at the top level of a file.
+
+## Tuples
+
+The game's tuples have no literal in JavaScript. Use arrays:
+
+- `return [a, b];` and `let [x, y] = f();`, which also reads what `measure()` and
+  `get_companion()` return, including nested ones: `let [type, [x, y]] = get_companion();`.
+- Arrays can be changed but the tuples the game returns can't, so `pos[0] = 1` on one is an error.
+- Arrays can't be dictionary keys. Use a string such as `str(x) + "," + str(y)`.
+
+## Dictionary keys
+
+As in JS, `{North: 1}` has the string `"North"` as its key. Use `{[North]: 1}` for the direction,
+or for values such as `{[Items.Hay]: 100}`.
 
 ## Same as real JavaScript, but easy to miss
 
