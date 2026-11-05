@@ -50,7 +50,7 @@ If you remove the mod while the PhpStorm preset is on, those keys stay until you
 
 ## Buttons
 
-Code windows get `{ }` (format), `?` (shortcuts) and `Copy`. Docs examples get `Copy`, which copies the code shown, in the current language, without any setup code.
+Code windows get `{ }` (format) beside the run and step buttons, plus `?` (shortcuts) and `Copy` beside minimize. Docs examples get `Copy`, which copies the code shown, in the current language, without any setup code.
 
 ## Not included
 

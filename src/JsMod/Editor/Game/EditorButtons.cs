@@ -12,11 +12,13 @@ namespace JsMod.Editor.Game
     {
         public CodeWindow Widened;
         public float ExtraWidth;
+        public RectTransform MovedName;
+        public float NameShift;
     }
 
     /// <summary>
-    /// Buttons copied from the game's own, and labelled with text. Positions come from the prefabs: header buttons sit 50 apart
-    /// from the top right corner, and the two rightmost are the game's close and minimize.
+    /// Buttons copied from the game's own, and labelled with text. Format follows run and step on the left. On the right,
+    /// positions come from the prefabs: header buttons sit 50 apart from the top right corner, and the two rightmost are the game's close and minimize.
     /// </summary>
     internal static class EditorButtons
     {
@@ -33,15 +35,36 @@ namespace JsMod.Editor.Game
             {
                 throw new InvalidOperationException("The code window has no MinimizeButton to copy.");
             }
-            AddButton(source, window.transform, "{ }", "editor button format", new Vector2(-116f, source.GetComponent<RectTransform>().anchoredPosition.y), 35f, () => EditorActions.Format(window, false));
-            AddButton(source, window.transform, "?", "editor button help", new Vector2(-166f, source.GetComponent<RectTransform>().anchoredPosition.y), 35f, () => window.workspace.AddNewDocsWindow(EditorBindings.ShortcutsDoc));
+            AddFormatButton(window, source);
+            AddButton(source, window.transform, "?", "editor button help", new Vector2(-116f, source.GetComponent<RectTransform>().anchoredPosition.y), 35f, () => window.workspace.AddNewDocsWindow(EditorBindings.ShortcutsDoc));
             ColoredButton copy = null;
-            copy = AddButton(source, window.transform, Localizer.Localize("editor copy label"), "editor button copy", new Vector2(-226f, source.GetComponent<RectTransform>().anchoredPosition.y), 65f, () => Copy(window, copy));
+            copy = AddButton(source, window.transform, Localizer.Localize("editor copy label"), "editor button copy", new Vector2(-176f, source.GetComponent<RectTransform>().anchoredPosition.y), 65f, () => Copy(window, copy));
             var tag = copy.GetComponent<EditorButtonTag>();
             var minWidth = Traverse.Create(window).Field("minWidth");
             minWidth.SetValue(minWidth.GetValue<float>() + WidthForHeaderButtons);
             tag.Widened = window;
             tag.ExtraWidth = WidthForHeaderButtons;
+        }
+
+        /// <summary>Sits beside the run and step buttons, one gap further along, and moves the file name over to make room.</summary>
+        private static void AddFormatButton(CodeWindow window, Transform source)
+        {
+            var traverse = Traverse.Create(window);
+            var run = (RectTransform)traverse.Field("executeButton").GetValue<ColoredButton>().transform;
+            var step = (RectTransform)traverse.Field("stepByStepButton").GetValue<ColoredButton>().transform;
+            float gap = step.anchoredPosition.x - run.anchoredPosition.x;
+            ColoredButton format = AddButton(source, window.transform, "{ }", "editor button format", Vector2.zero, step.sizeDelta.x, () => EditorActions.Format(window, false));
+            var rect = (RectTransform)format.transform;
+            rect.anchorMin = step.anchorMin;
+            rect.anchorMax = step.anchorMax;
+            rect.pivot = step.pivot;
+            rect.sizeDelta = step.sizeDelta;
+            rect.anchoredPosition = step.anchoredPosition + new Vector2(gap, 0f);
+            var name = (RectTransform)traverse.Field("fileNameText").GetValue<TMP_InputField>().transform;
+            name.offsetMin += new Vector2(gap, 0f);
+            var tag = format.GetComponent<EditorButtonTag>();
+            tag.MovedName = name;
+            tag.NameShift = gap;
         }
 
         internal static void AddToExample(CodeWindow codeWindow, GameObject executeButton)
@@ -142,6 +165,10 @@ namespace JsMod.Editor.Game
                     {
                         var minWidth = Traverse.Create(tag.Widened).Field("minWidth");
                         minWidth.SetValue(minWidth.GetValue<float>() - tag.ExtraWidth);
+                    }
+                    if (tag.MovedName != null)
+                    {
+                        tag.MovedName.offsetMin -= new Vector2(tag.NameShift, 0f);
                     }
                     // Now, not at the end of the frame, so that adding them back below sees that they're gone.
                     UnityEngine.Object.DestroyImmediate(tag.gameObject);

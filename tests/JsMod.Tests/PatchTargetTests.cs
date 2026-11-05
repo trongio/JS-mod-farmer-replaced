@@ -62,6 +62,9 @@ public class PatchTargetTests
         Assert.NotNull(typeof(CodeWindow).GetField("undoChangeTime", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("breakpointPanel", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("minWidth", Any));
+        Assert.NotNull(typeof(CodeWindow).GetField("executeButton", Any));
+        Assert.NotNull(typeof(CodeWindow).GetField("stepByStepButton", Any));
+        Assert.NotNull(typeof(CodeWindow).GetField("fileNameText", Any));
         Assert.NotNull(typeof(BreakPointPanel).GetField("breakpointLines", Any));
         Assert.NotNull(typeof(CodeExample).GetField("executeButton", Any));
         Assert.NotNull(typeof(Tooltip).GetField("info", Any));
