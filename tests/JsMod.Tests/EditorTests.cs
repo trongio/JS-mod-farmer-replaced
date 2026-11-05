@@ -356,19 +356,19 @@ public class EditorTests
     [Fact]
     public void NewLineBelowKeepsIndentAndOpensBlocks()
     {
-        EditResult plain = LineOps.NewLineBelow("    a\nb", 5, 5, false);
+        EditResult plain = LineOps.NewLineBelow("    a\nb", 5, 5, false, false);
         Assert.Equal("    a\n    \nb", plain.Text);
         Assert.Equal(10, plain.SelectionStart);
-        Assert.Equal("if x:\n\t", LineOps.NewLineBelow("if x:", 2, 2, false).Text);
-        Assert.Equal("    if (x) {\n        ", LineOps.NewLineBelow("    if (x) {", 2, 2, true).Text);
+        Assert.Equal("if x:\n\t", LineOps.NewLineBelow("if x:", 2, 2, false, true).Text);
+        Assert.Equal("    if (x) {\n        ", LineOps.NewLineBelow("    if (x) {", 2, 2, true, false).Text);
     }
 
     [Fact]
     public void JoinLinesTrimsAndSpaces()
     {
-        Assert.Equal("a b\nc", LineOps.JoinLines("a\n    b\nc", 0, 0).Text);
-        Assert.Equal("f(a)", LineOps.JoinLines("f(\n    a\n)", 0, 10).Text);
-        Assert.Null(LineOps.JoinLines("last", 1, 1));
+        Assert.Equal("a b\nc", LineOps.JoinLines("a\n    b\nc", 0, 0, false).Text);
+        Assert.Equal("f(a)", LineOps.JoinLines("f(\n    a\n)", 0, 10, true).Text);
+        Assert.Null(LineOps.JoinLines("last", 1, 1, false));
     }
 
     [Fact]
@@ -427,6 +427,135 @@ public class EditorTests
         Assert.Equal(EditorAction.MoveUp, EditorBindings.Find(defaults, KeyCode.UpArrow, false, true, true).Action);
         Assert.Null(EditorBindings.Find(defaults, KeyCode.Y, true, false, false));
         Assert.Null(EditorBindings.Find(defaults, KeyCode.None, false, false, false));
+    }
+
+    [Fact]
+    public void NewLineBelowUsesTheIndentSetting()
+    {
+        Assert.Equal("if x:\n    ", LineOps.NewLineBelow("if x:", 2, 2, false, false).Text);
+        Assert.Equal("\tif (x) {\n\t\t", LineOps.NewLineBelow("\tif (x) {", 2, 2, true, true).Text);
+    }
+
+    [Theory]
+    [InlineData("a # note\nb", false)]
+    [InlineData("s = '#' # note\nb", false)]
+    [InlineData("a // note\nb", true)]
+    [InlineData("s = \"//\"; // note\nb", true)]
+    [InlineData("a /* open\nb", true)]
+    public void JoinLinesWontPullCodeIntoAComment(string code, bool isJs)
+    {
+        Assert.Null(LineOps.JoinLines(code, 0, 0, isJs));
+    }
+
+    [Theory]
+    [InlineData("s = '#'\nb", false, "s = '#' b")]
+    [InlineData("a // b\nc", false, "a // b c")]
+    [InlineData("s = \"//\"\nb", true, "s = \"//\" b")]
+    [InlineData("a /* note */\nb", true, "a /* note */ b")]
+    [InlineData("s = 'it\\'s // x'\nb", true, "s = 'it\\'s // x' b")]
+    public void JoinLinesStillJoinsAroundLookalikes(string code, bool isJs, string expected)
+    {
+        Assert.Equal(expected, LineOps.JoinLines(code, 0, 0, isJs).Text);
+    }
+
+    [Fact]
+    public void ACopyOfASelectionWithAFinalCommentStillJoins()
+    {
+        Assert.Equal("a b # note", LineOps.JoinLines("a\nb # note", 0, 8, false).Text);
+    }
+
+    [Fact]
+    public void CharactersAfterAShortcutAreDroppedWhateverTheyAre()
+    {
+        var swallower = new CharacterSwallower();
+        swallower.OnBindingFired(7);
+        Assert.True(swallower.ShouldSwallow('j', 7));
+        Assert.True(swallower.ShouldSwallow('\n', 7));
+        Assert.True(swallower.ShouldSwallow('\t', 7));
+        Assert.False(swallower.ShouldSwallow('\0', 7));
+    }
+
+    [Fact]
+    public void TypingIsNeverDroppedOutsideAShortcut()
+    {
+        var swallower = new CharacterSwallower();
+        Assert.False(swallower.ShouldSwallow('a', 7));
+        swallower.OnBindingFired(7);
+        Assert.False(swallower.ShouldSwallow('a', 8));
+        swallower.OnBindingFired(9);
+        swallower.OnKey();
+        Assert.False(swallower.ShouldSwallow('a', 9));
+    }
+
+    [Fact]
+    public void TheGamePresetPrefersWhatThePlayerHad()
+    {
+        KeyCombination custom = EditorBindings.Parse("Ctrl R");
+        Assert.Equal(custom.key, EditorBindings.GameKeys(custom, "F5", "F6").key);
+        Assert.Equal(KeyCode.None, EditorBindings.GameKeys("", "F5", "F6").key);
+        Assert.Equal(KeyCode.F5, EditorBindings.GameKeys(null, "F5", "F6").key);
+        Assert.Equal(KeyCode.F6, EditorBindings.GameKeys(null, null, "F6").key);
+    }
+
+    private static FormatOutcome Gate(string source, string result, bool isJs = false)
+    {
+        return FormatGate.Check(source, isJs, _ => new FormatResult { Text = result }).Outcome;
+    }
+
+    [Fact]
+    public void TheGateAcceptsAWhitespaceOnlyChange()
+    {
+        Assert.Equal(FormatOutcome.Formatted, Gate("x=1 # note", "x = 1 # note"));
+        Assert.Equal(FormatOutcome.Formatted, Gate("let x=1; // note", "let x = 1; // note", true));
+    }
+
+    [Theory]
+    [InlineData("x = 1 # note", "x = 1", false)]
+    [InlineData("x = 1 # note", "x = 1 # other", false)]
+    [InlineData("let x = 1; // note", "let x = 1;", true)]
+    [InlineData("let x = 1; /* note */", "let x = 1;", true)]
+    public void TheGateRefusesALostOrChangedComment(string source, string result, bool isJs)
+    {
+        Assert.Equal(FormatOutcome.Unsafe, Gate(source, result, isJs));
+    }
+
+    [Theory]
+    [InlineData("x = 1", "x = 2", false)]
+    [InlineData("x = 'a  b'", "x = 'a b'", false)]
+    [InlineData("let x = 1;", "let x = 2;", true)]
+    [InlineData("let s = 'a  b';", "let s = 'a b';", true)]
+    public void TheGateRefusesAChangedToken(string source, string result, bool isJs)
+    {
+        Assert.Equal(FormatOutcome.Unsafe, Gate(source, result, isJs));
+    }
+
+    [Fact]
+    public void TheGateRefusesAChangedTreeWithTheSameTokens()
+    {
+        Assert.Equal(FormatOutcome.Unsafe, Gate("if x:\n    a()\n    b()", "if x:\n    a()\nb()"));
+    }
+
+    [Fact]
+    public void TheGateRefusesAResultThatKeepsChanging()
+    {
+        GateResult gate = FormatGate.Check("x = 1", false, text => new FormatResult { Text = text + "\n" });
+        Assert.Equal(FormatOutcome.Unsafe, gate.Outcome);
+    }
+
+    [Fact]
+    public void TheGateRefusesANullResultAndAThrowingFormatter()
+    {
+        Assert.Equal(FormatOutcome.Unsafe, FormatGate.Check("x = 1", false, _ => null).Outcome);
+        Assert.Equal(FormatOutcome.Unsafe, FormatGate.Check("x = 1", false, _ => throw new InvalidOperationException()).Outcome);
+    }
+
+    [Theory]
+    [InlineData("/* a   \n b */\nlet x = 1;")]
+    [InlineData("let s = `a   \nb`;")]
+    public void TrailingSpacesInsideAMultilinePieceAreKept(string code)
+    {
+        GateResult gate = FormatGate.Run(code, true, false);
+        Assert.Equal(FormatOutcome.Unchanged, gate.Outcome);
     }
 
     [Fact]

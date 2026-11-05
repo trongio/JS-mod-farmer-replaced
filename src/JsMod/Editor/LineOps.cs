@@ -159,7 +159,7 @@ namespace JsMod.Editor
         }
 
         /// <summary>Starts a line below the current one, with its indent, and one more after a line that opens a block.</summary>
-        public static EditResult NewLineBelow(string text, int start, int end, bool isJs)
+        public static EditResult NewLineBelow(string text, int start, int end, bool isJs, bool useTabs)
         {
             int position = Math.Max(start, end);
             int lineStart = LineStart(text, position);
@@ -169,14 +169,15 @@ namespace JsMod.Editor
             string trimmed = line.TrimEnd();
             if (trimmed.EndsWith(isJs ? "{" : ":", StringComparison.Ordinal))
             {
-                indent += indent.StartsWith(" ", StringComparison.Ordinal) ? "    " : "\t";
+                indent += useTabs ? "\t" : "    ";
             }
             string inserted = "\n" + indent;
             int caret = lineEnd + inserted.Length;
             return new EditResult(text.Insert(lineEnd, inserted), caret, caret);
         }
 
-        public static EditResult JoinLines(string text, int start, int end)
+        /// <summary>Refuses when a line comment would swallow the code joined after it.</summary>
+        public static EditResult JoinLines(string text, int start, int end, bool isJs)
         {
             SelectedLines(text, start, end, out int first, out int last);
             if (last >= text.Length && first == LineStart(text, last))
@@ -189,6 +190,13 @@ namespace JsMod.Editor
                 stop = LineEnd(text, last + 1);
             }
             string[] lines = text.Substring(first, stop - first).Split('\n');
+            for (int i = 0; i < lines.Length - 1; i++)
+            {
+                if (MayEndInLineComment(lines[i], isJs))
+                {
+                    return null;
+                }
+            }
             string joined = lines[0].TrimEnd();
             int caret = first + joined.Length;
             for (int i = 1; i < lines.Length; i++)
@@ -202,6 +210,46 @@ namespace JsMod.Editor
                 joined += (tight ? "" : " ") + next;
             }
             return new EditResult(text.Substring(0, first) + joined + text.Substring(stop), caret, caret);
+        }
+
+        /// <summary>Whether a line has a line comment outside its strings. Anything it can't follow counts as yes.</summary>
+        private static bool MayEndInLineComment(string line, bool isJs)
+        {
+            for (int i = 0; i < line.Length; i++)
+            {
+                char c = line[i];
+                if (c == '\'' || c == '"' || (isJs && c == '`'))
+                {
+                    int close = i + 1;
+                    while (close < line.Length && line[close] != c)
+                    {
+                        close += isJs && line[close] == '\\' ? 2 : 1;
+                    }
+                    if (close >= line.Length)
+                    {
+                        return true;
+                    }
+                    i = close;
+                }
+                else if (!isJs && c == '#')
+                {
+                    return true;
+                }
+                else if (isJs && c == '/' && i + 1 < line.Length && line[i + 1] == '/')
+                {
+                    return true;
+                }
+                else if (isJs && c == '/' && i + 1 < line.Length && line[i + 1] == '*')
+                {
+                    int end = line.IndexOf("*/", i + 2, StringComparison.Ordinal);
+                    if (end < 0)
+                    {
+                        return true;
+                    }
+                    i = end + 1;
+                }
+            }
+            return false;
         }
 
         public static EditResult ToggleCase(string text, int start, int end)

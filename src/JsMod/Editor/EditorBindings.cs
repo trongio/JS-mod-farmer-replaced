@@ -23,6 +23,30 @@ namespace JsMod.Editor
         ParameterInfo
     }
 
+    /// <summary>
+    /// A key arrives twice: as a key, and then in the same frame as its character, which for Ctrl combinations can be a control
+    /// character such as a newline. So after a shortcut, characters are dropped until the next key or the next frame.
+    /// </summary>
+    public sealed class CharacterSwallower
+    {
+        private int frame = -1;
+
+        public void OnBindingFired(int currentFrame)
+        {
+            frame = currentFrame;
+        }
+
+        public void OnKey()
+        {
+            frame = -1;
+        }
+
+        public bool ShouldSwallow(char character, int currentFrame)
+        {
+            return character != '\0' && currentFrame == frame;
+        }
+    }
+
     /// <summary>The editor's shortcuts, modelled on PhpStorm's default keymap. Option names are also the keys of their labels.</summary>
     public static class EditorBindings
     {
@@ -69,6 +93,23 @@ namespace JsMod.Editor
             ("redo 2", "Ctrl Y", ""),
             (DeleteLineOption, "", "Ctrl Y")
         };
+
+        /// <summary>Where a key is kept while the PhpStorm preset replaces it.</summary>
+        public static string SavedKeysOption(string option)
+        {
+            return "editor keymap saved " + option;
+        }
+
+        /// <summary>The key the Game preset puts back: what the player had, else the game's default, else our own table's.</summary>
+        public static KeyCombination GameKeys(object saved, string stockDefault, string tableDefault)
+        {
+            if (saved is KeyCombination combination)
+            {
+                return combination;
+            }
+            // An unbound key reads back from options.txt as an empty string.
+            return Parse(saved as string ?? stockDefault ?? tableDefault);
+        }
 
         public static KeyCombination Parse(string keys)
         {

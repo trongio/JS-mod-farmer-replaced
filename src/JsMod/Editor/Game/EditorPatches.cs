@@ -10,8 +10,7 @@ namespace JsMod.Editor.Game
     [HarmonyPatch(typeof(CodeInputField), "KeyPressed")]
     internal static class EditorKeysPatch
     {
-        private static int swallowFrame = -1;
-        private static char swallowCharacter;
+        private static readonly CharacterSwallower Swallower = new CharacterSwallower();
 
         private static bool Prefix(CodeInputField __instance, Event evt)
         {
@@ -21,14 +20,16 @@ namespace JsMod.Editor.Game
                 {
                     return true;
                 }
-                // Some keys arrive twice: as a key, and then in the same frame as its character.
-                if (evt.keyCode == KeyCode.None && evt.character != '\0' && Time.frameCount == swallowFrame && char.ToLowerInvariant(evt.character) == swallowCharacter)
+                if (evt.keyCode == KeyCode.None)
                 {
-                    swallowFrame = -1;
-                    return false;
+                    if (Swallower.ShouldSwallow(evt.character, Time.frameCount))
+                    {
+                        return false;
+                    }
                 }
-                if (evt.keyCode != KeyCode.None)
+                else
                 {
+                    Swallower.OnKey();
                     EditorActions.DismissWordInfo(__instance);
                 }
                 bool ctrl = evt.control;
@@ -52,8 +53,7 @@ namespace JsMod.Editor.Game
                     }
                     return true;
                 }
-                swallowFrame = Time.frameCount;
-                swallowCharacter = evt.keyCode >= KeyCode.Space && evt.keyCode <= KeyCode.Tilde ? char.ToLowerInvariant((char)evt.keyCode) : evt.keyCode == KeyCode.Return ? '\n' : '\0';
+                Swallower.OnBindingFired(Time.frameCount);
                 EditorActions.Perform(binding.Action, window);
                 return false;
             }
@@ -65,14 +65,21 @@ namespace JsMod.Editor.Game
         }
     }
 
-    [HarmonyPatch(typeof(CodeWindow), "StartExecution")]
+    /// <summary>On the one call that both the run buttons and the run key go through. They've already parsed, so a change means parsing again.</summary>
+    [HarmonyPatch(typeof(MainSim), nameof(MainSim.StartMainExecution))]
     internal static class FormatOnRunPatch
     {
-        private static void Prefix(CodeWindow __instance)
+        private static void Prefix(MainSim __instance, CodeWindow cw, ref Node syntaxTree)
         {
-            if (EditorOptions.IsOn(EditorBindings.FormatOnRunOption))
+            if (!EditorOptions.IsOn(EditorBindings.FormatOnRunOption) || __instance.IsExecuting())
             {
-                EditorActions.Format(__instance, true);
+                return;
+            }
+            string before = cw.CodeInput.text;
+            EditorActions.Format(cw, true);
+            if (cw.CodeInput.text != before)
+            {
+                syntaxTree = cw.Parse() ?? syntaxTree;
             }
         }
     }

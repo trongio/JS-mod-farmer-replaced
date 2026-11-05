@@ -30,6 +30,12 @@ namespace JsMod.Editor
     {
         public static GateResult Run(string source, bool isJs, bool useTabs, bool keepLines = false, int firstLine = -1, int lastLine = -1)
         {
+            return Check(source, isJs, text => Apply(text, isJs, useTabs, keepLines, firstLine, lastLine));
+        }
+
+        /// <summary>The gate itself, around any formatter, so that tests can feed it results a good formatter wouldn't produce.</summary>
+        public static GateResult Check(string source, bool isJs, Func<string, FormatResult> format)
+        {
             try
             {
                 Program before;
@@ -42,7 +48,7 @@ namespace JsMod.Editor
                 {
                     return new GateResult { Outcome = FormatOutcome.DoesNotParse };
                 }
-                FormatResult result = Apply(source, isJs, useTabs, keepLines, firstLine, lastLine);
+                FormatResult result = format(source);
                 if (result == null)
                 {
                     return Unsafe();
@@ -55,7 +61,7 @@ namespace JsMod.Editor
                 {
                     return Unsafe();
                 }
-                if (Apply(result.Text, isJs, useTabs, keepLines, firstLine, lastLine)?.Text != result.Text)
+                if (format(result.Text)?.Text != result.Text)
                 {
                     return Unsafe();
                 }

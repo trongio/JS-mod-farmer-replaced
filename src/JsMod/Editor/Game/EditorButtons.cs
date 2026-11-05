@@ -3,6 +3,7 @@ using System.Collections;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace JsMod.Editor.Game
@@ -96,6 +97,9 @@ namespace JsMod.Editor.Game
             button.onClick = new Button.ButtonClickedEvent();
             button.onClick.AddListener(() => clicked());
             ColoredButton colored = clone.GetComponent<ColoredButton>();
+            // The source's hold action would otherwise still fire on a long press.
+            colored.onHeld = new UnityEvent();
+            Traverse.Create(colored).Field("holdDuration").SetValue(0f);
             colored.SetTooltipDescription(tooltip);
             Transform icon = clone.transform.Find("Image");
             if (icon != null)

@@ -4,6 +4,7 @@ using HarmonyLib;
 using JsMod.Lang;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace JsMod.Editor.Game
 {
@@ -18,6 +19,8 @@ namespace JsMod.Editor.Game
         private static readonly FieldInfo BreakpointLines = AccessTools.Field(typeof(BreakPointPanel), "breakpointLines");
 
         private static bool tooltipShown;
+
+        private static bool UseTabs => OptionHolder.GetString("tabs to spaces") == "disabled";
 
         internal static bool CanEdit(CodeWindow window)
         {
@@ -64,10 +67,10 @@ namespace JsMod.Editor.Game
                         Apply(window, LineOps.MoveLines(text, start, end, false));
                         return;
                     case EditorAction.NewLineBelow:
-                        Apply(window, LineOps.NewLineBelow(text, start, end, isJs));
+                        Apply(window, LineOps.NewLineBelow(text, start, end, isJs, UseTabs));
                         return;
                     case EditorAction.JoinLines:
-                        Apply(window, LineOps.JoinLines(text, start, end));
+                        Apply(window, LineOps.JoinLines(text, start, end, isJs));
                         return;
                     case EditorAction.ToggleCase:
                         Apply(window, LineOps.ToggleCase(text, start, end));
@@ -94,7 +97,7 @@ namespace JsMod.Editor.Game
                 int anchor = input.selectionStringAnchorPosition;
                 int focus = input.selectionStringFocusPosition;
                 bool isJs = LanguageMode.IsJs(text, window);
-                bool useTabs = OptionHolder.GetString("tabs to spaces") != "enabled";
+                bool useTabs = UseTabs;
                 int firstLine = -1;
                 int lastLine = -1;
                 if (anchor != focus)
@@ -117,7 +120,7 @@ namespace JsMod.Editor.Game
                         {
                             // The game's own message, at the error's own position.
                             window.Parse();
-                            ShowError.Invoke(window, null);
+                            ShowFailure(window);
                         }
                         break;
                     case FormatOutcome.Unsafe:
@@ -125,7 +128,7 @@ namespace JsMod.Editor.Game
                         if (!silent)
                         {
                             window.SetErrorMessage(Localizer.Localize("editor format unsafe"), 0, Math.Min(1, text.Length));
-                            ShowError.Invoke(window, null);
+                            ShowFailure(window);
                         }
                         break;
                 }
@@ -134,6 +137,13 @@ namespace JsMod.Editor.Game
             {
                 Plugin.Log.LogWarning("Formatting failed, so the code was left alone: " + ex.Message);
             }
+        }
+
+        /// <summary>The game only shows errors when the input isn't focused, so this lets go of it, as the game's own run key does.</summary>
+        private static void ShowFailure(CodeWindow window)
+        {
+            EventSystem.current?.SetSelectedGameObject(null);
+            ShowError.Invoke(window, null);
         }
 
         private static int LineOf(string text, int position)

@@ -48,7 +48,7 @@ public class PatchTargetTests
         AssertTarget(typeof(BuiltinFunctions), "StringConstructor", "exec", "droneId");
         AssertTarget(typeof(TMPTextLocalizer), "LocalizeText");
         AssertTarget(typeof(TMPro.CodeInputField), "KeyPressed", "evt");
-        AssertTarget(typeof(CodeWindow), "StartExecution");
+        AssertTarget(typeof(MainSim), "StartMainExecution");
         AssertTarget(typeof(CodeWindow), "Load", "readOnly");
         AssertTarget(typeof(CodeWindow), "SetToCodeState");
         AssertTarget(typeof(CodeWindow), "ShowError");
@@ -62,6 +62,8 @@ public class PatchTargetTests
         Assert.NotNull(typeof(CodeWindow).GetField("undoChangeTime", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("breakpointPanel", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("minWidth", Any));
+        Assert.NotNull(typeof(ColoredButton).GetField("holdDuration", Any));
+        Assert.NotNull(typeof(ColoredButton).GetField("onHeld", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("executeButton", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("stepByStepButton", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("fileNameText", Any));

@@ -9,6 +9,7 @@ namespace JsMod.Editor.Game
     public static class EditorOptions
     {
         private static readonly List<OptionSO> Rows = new List<OptionSO>();
+        private static readonly Dictionary<string, string> StockDefaults = new Dictionary<string, string>();
         private static bool seeding;
 
         public static bool Enabled => OptionHolder.GetString(EditorBindings.MasterOption, "enabled") != "disabled";
@@ -54,6 +55,10 @@ namespace JsMod.Editor.Game
 
         private static void BuildRows(List<OptionSO> options)
         {
+            foreach (KeyBindOptionSO stock in options.OfType<KeyBindOptionSO>())
+            {
+                StockDefaults[stock.optionName] = stock.defaultValue;
+            }
             OptionSO toggle = Template<CycleOptionSO>(options, "autosave");
             OptionSO dropdown = Template<DropdownOptionSO>(options, "language");
             OptionSO keyBind = Template<KeyBindOptionSO>(options, "autocomplete");
@@ -85,6 +90,29 @@ namespace JsMod.Editor.Game
             return row;
         }
 
+        private static void ApplyPreset()
+        {
+            bool phpStorm = OptionHolder.GetString(EditorBindings.KeymapOption) == EditorBindings.KeymapPhpStorm;
+            foreach ((string option, string game, string php) in EditorBindings.Preset)
+            {
+                string saved = EditorBindings.SavedKeysOption(option);
+                if (phpStorm)
+                {
+                    object current = OptionHolder.GetOption(option);
+                    if (current != null)
+                    {
+                        OptionHolder.SetOption(saved, current);
+                    }
+                    OptionHolder.SetOption(option, EditorBindings.Parse(php));
+                }
+                else
+                {
+                    StockDefaults.TryGetValue(option, out string stock);
+                    OptionHolder.SetOption(option, EditorBindings.GameKeys(OptionHolder.GetOption(saved), stock, game));
+                }
+            }
+        }
+
         internal static void OnOptionChanged(string item)
         {
             if (seeding)
@@ -93,10 +121,9 @@ namespace JsMod.Editor.Game
             }
             if (item == EditorBindings.KeymapOption)
             {
-                bool phpStorm = OptionHolder.GetString(EditorBindings.KeymapOption) == EditorBindings.KeymapPhpStorm;
-                foreach ((string option, string game, string php) in EditorBindings.Preset)
+                if (Enabled)
                 {
-                    OptionHolder.SetOption(option, EditorBindings.Parse(phpStorm ? php : game));
+                    ApplyPreset();
                 }
             }
             else if (item == EditorBindings.MasterOption)

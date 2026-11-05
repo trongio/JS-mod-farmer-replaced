@@ -16,7 +16,7 @@ Your code is left alone unless all of these hold:
 
 Formatting is one undo step. If the window has breakpoints, blank lines stay so that breakpoints keep their lines. Indentation follows the game's Tabs to Spaces option.
 
-**Format on run** and **Format on save** are options, both off by default. Format on save applies to the save key, not autosave.
+**Format on run** and **Format on save** are options, both off by default. Format on run covers the run buttons, the run key and `Ctrl Enter`. Format on save applies to the save key, not autosave, and the game may write the file before formatting finishes, so the formatted text can reach the disk on the next save.
 
 ## Shortcuts
 
@@ -47,7 +47,9 @@ The **Shortcut preset** option in Options > General sets these to PhpStorm's key
 | Delete line | not set | `Ctrl Y` |
 | Second redo | `Ctrl Y` | not set |
 
-If you remove the mod while the PhpStorm preset is on, those keys stay until you change them in the game's options.
+Setting the preset back to Game restores the keys you had before choosing PhpStorm. If you remove the mod while the PhpStorm preset is on, those keys stay until you change them in the game's options.
+
+The game checks its own keys, such as run and save, separately from the editor. If you bind an editor shortcut to one of them, both actions happen. On keyboard layouts where AltGr produces letters, AltGr counts as `Ctrl Alt`, so a key such as AltGr+L can trigger Format; rebind it if that gets in the way.
 
 ## Buttons
 

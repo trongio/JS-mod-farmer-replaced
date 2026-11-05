@@ -37,6 +37,8 @@ namespace JsMod.Editor
 
         private sealed class Line
         {
+            /// <summary>Ends inside a block comment or template literal, so its trailing spaces belong to that piece.</summary>
+            public bool ContinuesRaw;
             public readonly List<Piece> Pieces = new List<Piece>();
             public int Width;
 
@@ -260,6 +262,7 @@ namespace JsMod.Editor
             line.Pieces.Add(new Piece { Kind = kind, Value = parts[0] });
             for (int p = 1; p < parts.Length; p++)
             {
+                line.ContinuesRaw = true;
                 line = new Line { StartsRaw = true };
                 lines.Add(line);
                 line.Pieces.Add(new Piece { Kind = kind == Kind.BlockComment ? Kind.Raw : Kind.Text, Value = parts[p] });
@@ -411,7 +414,7 @@ namespace JsMod.Editor
                 {
                     return null;
                 }
-                output.Add(line.StartsRaw ? text : text.TrimEnd());
+                output.Add(line.StartsRaw || line.ContinuesRaw ? text : text.TrimEnd());
                 Piece last = line.Pieces.LastOrDefault(p => !p.IsComment);
                 if (last != null)
                 {
