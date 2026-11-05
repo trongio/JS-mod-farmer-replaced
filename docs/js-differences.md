@@ -1,8 +1,24 @@
 # How this JavaScript differs from real JavaScript
 
-Start a code window with `// @js` to use it. JavaScript here is translated into the
-game's own language, so it keeps the game's costs and rules. That leads to these
-differences.
+JavaScript here is translated into the game's own language, so it keeps the game's costs
+and rules. That leads to the differences below.
+
+## Choosing the language
+
+**Options > General > Programming language** sets the language of your code windows, either
+Python (the default) or JavaScript. It takes effect straight away, with no restart: open
+windows are parsed and coloured again. A program that is already running keeps the code it
+started with, and its windows pick up the new language the next time you run them.
+
+The first non-blank line of a file can override the setting for that file:
+
+- `// @js` makes it JavaScript.
+- `# @py` makes it Python.
+
+A file keeps its own language when another file imports it, so a `# @py` file can import a
+JavaScript one. The setting only applies to your own files. Docs examples and the game's
+internal code are always Python. Python files with no marker show errors in JavaScript mode,
+so add `# @py` to the ones you want to keep.
 
 ## Scope
 
@@ -38,7 +54,8 @@ differences.
 
 Each of these reports an error at its position: ternary `?:`, arrow functions and function
 expressions, classes and `new`, `typeof`, `switch`, `do`, `try`, `??`, `?.`, spread, bitwise
-operators, `${}` in templates, `for...in`, regular expressions, `import` and `export`.
+operators, `${}` in templates, `for...in`, regular expressions, `import` and `export`. Without
+`import`, a JavaScript file can be imported but can't import anything itself.
 
 ## Same as real JavaScript, but easy to miss
 
