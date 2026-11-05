@@ -146,6 +146,8 @@ public class LanguageModeTests : IDisposable
     public void CodeWithNoWindowIsColouredInTheLanguageOfTheSetting()
     {
         const string code = "x = 1";
+        JsContent.Warn = null;
+        JsContent.Load(ContentTests.ContentFolder);
         Assert.Equal("original", JsHighlighter.Select("original", code));
         UseSetting(LanguageMode.Python);
         Assert.Equal("original", JsHighlighter.Select("original", code));
@@ -329,7 +331,13 @@ public class LanguageModeTests : IDisposable
 
     [Theory]
     [InlineData("    }", 5, "}", 1)]
-    [InlineData("if (a) {\n        }", 18, "if (a) {\n    }", 14)]
+    [InlineData("if (a) {\n    }", 14, "if (a) {\n}", 10)]
+    [InlineData("if (a) {\n        }", 18, "if (a) {\n}", 10)]
+    [InlineData("if (a) {\n  x;\n  }", 17, "if (a) {\n  x;\n}", 15)]
+    [InlineData("  if (a) {\n    x;\n    }", 23, "  if (a) {\n    x;\n  }", 21)]
+    [InlineData("\tif (a) {\n\t\t}", 13, "\tif (a) {\n\t}", 12)]
+    [InlineData("if (a) {\n  x; // }\n  y = \"}\";\n  }", 33, "if (a) {\n  x; // }\n  y = \"}\";\n}", 31)]
+    [InlineData("  a;\n    }", 10, "  a;\n  }", 8)]
     [InlineData("\t}", 2, "}", 1)]
     [InlineData("\t\t}", 3, "\t}", 2)]
     [InlineData("  }", 3, "}", 1)]
@@ -345,6 +353,9 @@ public class LanguageModeTests : IDisposable
     [InlineData("a }", 3)]
     [InlineData("    x", 5)]
     [InlineData("    {", 5)]
+    [InlineData("if (a) {\n}", 10)]
+    [InlineData("  if (a) {\n  }", 14)]
+    [InlineData("  if (a) {\n }", 13)]
     public void ClosingBraceIsLeftAloneWhenNotFirstOnItsLine(string text, int caret)
     {
         string before = text;
@@ -425,4 +436,91 @@ public class LanguageModeTests : IDisposable
         }
         Assert.True(missing.Count == 0, string.Join("\n", missing));
     }
+
+    [Theory]
+    // Setting, file, window: JS only when the setting is JS and the file calling is JS.
+    [InlineData("JavaScript", "x = 1;", "player", true)]
+    [InlineData("JavaScript", "// @js\nx = 1;", "player", true)]
+    [InlineData("JavaScript", "# @py\nx = 1", "player", false)]
+    [InlineData("JavaScript", "x = 1;", "markedExample", true)]
+    [InlineData("JavaScript", "x = 1", "example", false)]
+    [InlineData("JavaScript", "x = 1", "none", false)]
+    [InlineData("Python", "x = 1", "player", false)]
+    [InlineData("Python", "// @js\nx = 1;", "player", false)]
+    [InlineData("Python", "x = 1;", "markedExample", false)]
+    public void StrFollowsTheCallingFile(string setting, string code, string windowKind, bool expected)
+    {
+        UseSetting(setting);
+        CodeWindow window = windowKind switch
+        {
+            "player" => PlayerWindow(),
+            "none" => null,
+            _ => DocsExampleWindow()
+        };
+        if (windowKind == "markedExample")
+        {
+            LanguageMode.MarkJsExample(window);
+        }
+        Assert.Equal(expected, Display.StrIsJs(code, window));
+    }
+
+    [Fact]
+    public void StrWithNoSourceIsStock()
+    {
+        UseSetting(LanguageMode.JavaScript);
+        Assert.False(Display.StrIsJs(null, PlayerWindow()));
+    }
+
+    [Theory]
+    [InlineData("JavaScript", false, "True", "None")]
+    [InlineData("JavaScript", true, "true", "null")]
+    [InlineData("Python", false, "True", "None")]
+    public void StrScopeOverridesTheSettingAndAppliesToEachValue(string setting, bool fileIsJs, string expectedBool, string expectedNone)
+    {
+        UseSetting(setting);
+        int outer = Display.EnterStr(fileIsJs);
+        try
+        {
+            // ToNiceString formats each element of a list by calling itself, so its patch sees each one here.
+            Assert.Equal(expectedBool, Spell(new PyBool(true)));
+            Assert.Equal(expectedNone, Spell(new PyNone()));
+        }
+        finally
+        {
+            Display.ExitStr(outer);
+        }
+    }
+
+    [Fact]
+    public void DisplayFollowsTheSettingOutsideStrAndScopesNest()
+    {
+        UseSetting(LanguageMode.JavaScript);
+        Assert.Equal("true", Spell(new PyBool(true)));
+        int outer = Display.EnterStr(false);
+        int inner = Display.EnterStr(true);
+        Assert.Equal("true", Spell(new PyBool(true)));
+        Display.ExitStr(inner);
+        Assert.Equal("True", Spell(new PyBool(true)));
+        Display.ExitStr(outer);
+        Assert.Equal("true", Spell(new PyBool(true)));
+    }
+
+    [Fact]
+    public void StrScopeBelongsToOneThread()
+    {
+        UseSetting(LanguageMode.JavaScript);
+        int outer = Display.EnterStr(false);
+        string other = null;
+        var thread = new System.Threading.Thread(() => other = Spell(new PyBool(true)));
+        thread.Start();
+        thread.Join();
+        Display.ExitStr(outer);
+        Assert.Equal("true", other);
+    }
+
+    private static string Spell(object value)
+    {
+        return Display.NiceString(value, out string text) ? text : value is PyNone ? "None" : value.ToString();
+    }
 }
+

@@ -55,7 +55,11 @@ namespace JsMod
             PatchOptional(harmony, typeof(CodeTagsPatch));
             PatchOptional(harmony, typeof(LoadDocPatch));
             PatchOptional(harmony, typeof(CodeExamplePatch));
-            PatchOptional(harmony, typeof(NiceStringPatch));
+            // Together: without the scope, a program's str() values would change with the setting.
+            if (PatchOptional(harmony, typeof(StrScopePatch)))
+            {
+                PatchOptional(harmony, typeof(NiceStringPatch));
+            }
             PatchOptional(harmony, typeof(UnlockBoxPatch));
             PatchOptional(harmony, typeof(ImportCompletionPatch));
             PatchOptional(harmony, typeof(SignaturePatch));
@@ -96,15 +100,17 @@ namespace JsMod
             }
         }
 
-        private static void PatchOptional(Harmony harmony, Type patch)
+        private static bool PatchOptional(Harmony harmony, Type patch)
         {
             try
             {
                 harmony.CreateClassProcessor(patch).Patch();
+                return true;
             }
             catch (Exception ex)
             {
                 Log.LogWarning("Optional patch " + patch.Name + " failed: " + ex.Message);
+                return false;
             }
         }
     }

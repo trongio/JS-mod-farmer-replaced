@@ -23,8 +23,13 @@ the ones you want to keep.
 
 In JavaScript mode the code the game shows is JavaScript too: docs examples, which also run as
 JavaScript, code in tooltips and error messages, the tech tree's unlock boxes, autocomplete and
-hover text. `print`, `str()` and hover values show `true`, `false` and `null`, in Python files
-as well, because a program can mix files.
+hover text. `print` and hover values show `true`, `false` and `null`, in Python files as well.
+
+`str()` is different, because a program can compare its result or use it as a key. It follows the
+file calling it: `str(true)` is `"true"` in a JavaScript file in JavaScript mode, and stays
+`"True"` in a `# @py` file. In Python mode it's always `"True"`, even in a `// @js` file. The
+language is read when `str()` runs, so changing the setting during a run changes what later calls
+in unmarked files return, and code comparing the two can then disagree.
 
 This covers English and Georgian. Other display languages get the same wherever their code
 matches the English text. Anything that doesn't match stays Python, and an example that stays
@@ -62,6 +67,8 @@ as a `while` loop.
   `a.length`, `a.includes(x)`, `s.has(x)` and `console.log(x)`.
 - `Math.floor(a / b)` is the game's floor division. `Math.floor(x)`, `Math.abs`, `Math.min`,
   `Math.max` and `Math.random` are there too, but nothing else on `Math`.
+- Declaring your own `Math` or `console` turns these off for that file, wherever the declaration
+  is. A `Math` brought in by `import * from` doesn't, so import it by name instead.
 - Names built into the game, such as `North` and `Items`, can't be reassigned. Functions
   such as `harvest` can, the same as in Python.
 

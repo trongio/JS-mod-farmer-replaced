@@ -46,9 +46,13 @@ namespace JsMod.Lang
 
         public static bool IsJsWhileColouring(string code)
         {
-            // With no window, this is code in tooltips and docs text, which is shown in the language of the setting.
             CodeWindow window = colouring;
-            return (object)window != null ? IsJs(code, window) : JsMarker.IsJs(code) || (!JsMarker.IsPy(code) && SettingIsJs);
+            if ((object)window != null)
+            {
+                return IsJs(code, window);
+            }
+            // With no window, this is code in tooltips and docs text. It follows the setting, unless it stayed Python because nothing matched it.
+            return JsMarker.IsJs(code) || (!JsMarker.IsPy(code) && SettingIsJs && JsContent.ColoursAsJs(code));
         }
 
         /// <summary>

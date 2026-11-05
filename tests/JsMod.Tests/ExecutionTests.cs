@@ -221,6 +221,9 @@ public class ExecutionTests
     [Fact]
     public void DeclaredVariablesNamedLikeAliasesStayOrdinary()
     {
+        // A top level declaration counts even in a function above it, and one inside a function doesn't reach the whole file.
+        Assert.Equal(9, RunJs("function g() { return 9; }\nfunction f() { return Math.floor(); }\nlet Math = {\"floor\": g};\nlet r = 9;").Number("r"));
+        Assert.Throws<ParseException>(() => ParseJs("function f() { let Math = 1; }\nlet r = Math.sin(1);"));
         Assert.Equal(4, RunJs("function g() { return 4; }\nlet Math = {\"floor\": g};\nlet r = Math[\"floor\"]();").Number("r"));
         var error = Assert.Throws<ParseException>(() => ParseJs("let r = Math.sin(1);"));
         Assert.Contains("Math.sin", error.Message);

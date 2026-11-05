@@ -44,6 +44,11 @@ public class PatchTargetTests
         AssertTarget(typeof(FunctionNode), "GetSignature");
         AssertTarget(typeof(TooltipUtils), "KeywordTooltip", "word");
         AssertTarget(typeof(UnlockBox), "SetupRec");
+        AssertTarget(typeof(UnlockBox), "OnThemeChanged");
+        AssertTarget(typeof(BuiltinFunctions), "StringConstructor", "exec", "droneId");
+        AssertTarget(typeof(TMPTextLocalizer), "LocalizeText");
+        Assert.NotNull(typeof(ProgramState).GetProperty("CurrentExecutingNode", Any));
+        Assert.NotNull(typeof(Execution).GetProperty("States", Any));
         Assert.NotNull(typeof(CodeExample).GetField("codeWindow", Any));
         Assert.NotNull(typeof(UnlockSO).GetField("displayCode", Any));
     }

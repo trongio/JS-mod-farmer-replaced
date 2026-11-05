@@ -14,7 +14,7 @@ using static TestSupport;
 public class ContentTests : IDisposable
 {
     private static readonly string Root = FindRoot();
-    private static readonly string ContentFolder = Path.Combine(Root, "src", "JsMod", "js");
+    internal static readonly string ContentFolder = Path.Combine(Root, "src", "JsMod", "js");
     private static readonly string Languages = Path.Combine(GameAssemblies.ManagedDir, "..", "StreamingAssets", "Languages");
     private static readonly string[] Packs = { Path.Combine(Languages, "EN"), Path.Combine(Root, "translations", "KA") };
 
@@ -292,9 +292,100 @@ public class ContentTests : IDisposable
         JsContent.Load(Path.Combine(ContentFolder, "does-not-exist"));
         JsContent.Warn = null;
         LanguageMode.ReadSetting = () => LanguageMode.JavaScript;
-        Assert.Equal(2, warnings.Count);
+        Assert.Contains("does-not-exist", Assert.Single(warnings));
         Assert.Equal("`True`", Display.CodeTags("`True`"));
         Assert.False(JsContent.IsJsExample("harvest();"));
+        Assert.False(LanguageMode.IsJsWhileColouring("let x = 1;"));
+    }
+
+    [Fact]
+    public void AMissingContentFileIsNamed()
+    {
+        string folder = Directory.CreateTempSubdirectory().FullName;
+        try
+        {
+            var warnings = new List<string>();
+            JsContent.Warn = warnings.Add;
+            JsContent.Load(folder);
+            JsContent.Warn = null;
+            Assert.Equal(2, warnings.Count);
+            Assert.Contains(warnings, w => w.Contains(JsContent.SpansFile));
+            Assert.Contains(warnings, w => w.Contains(JsContent.ExamplesFile));
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
+
+    [Theory]
+    [InlineData("function f() {", true)]
+    [InlineData("let x = 1;", true)]
+    [InlineData("harvest()", true)]
+    [InlineData("print(\"and\")", true)]
+    [InlineData("let a = {k: 1};", true)]
+    [InlineData("import \"lib\";", true)]
+    [InlineData("import { a } from \"lib\";", true)]
+    [InlineData("def f():", false)]
+    [InlineData("x = None", false)]
+    [InlineData("if a and b:", false)]
+    [InlineData("while True:\n    pass", false)]
+    [InlineData("for i in range(3):", false)]
+    [InlineData("# a comment", false)]
+    [InlineData("x = 1 # a comment", false)]
+    [InlineData("import lib", false)]
+    [InlineData("from lib import f", false)]
+    public void CodeOutsideAWindowColoursByWhatItLooksLike(string code, bool expected)
+    {
+        LanguageMode.ReadSetting = () => LanguageMode.JavaScript;
+        Assert.Equal(expected, LanguageMode.IsJsWhileColouring(code));
+    }
+
+    [Fact]
+    public void CodeOutsideAWindowIsPythonInPythonMode()
+    {
+        LanguageMode.ReadSetting = () => LanguageMode.Python;
+        Assert.False(LanguageMode.IsJsWhileColouring("let x = 1;"));
+    }
+
+    [Fact]
+    public void APageOnlyWeHaveStillLooksMissingToTheGame()
+    {
+        string folder = Directory.CreateTempSubdirectory().FullName;
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(folder, "EN", "docs"));
+            File.WriteAllText(Path.Combine(folder, "EN", "docs", "a.md"), "en");
+            JsContent.Warn = null;
+            JsContent.Load(folder);
+            LanguageMode.ReadSetting = () => LanguageMode.JavaScript;
+            Assert.Equal("", Display.Doc("EN", "docs/a.md", ""));
+            Assert.Null(Display.Doc("EN", "docs/a.md", null));
+            Assert.Equal("en", Display.Doc("EN", "docs/a.md", "x"));
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
+    }
+
+    [Fact]
+    public void PagesAreListedWhenLoaded()
+    {
+        string folder = Directory.CreateTempSubdirectory().FullName;
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(folder, "EN", "docs"));
+            JsContent.Warn = null;
+            JsContent.Load(folder);
+            LanguageMode.ReadSetting = () => LanguageMode.JavaScript;
+            File.WriteAllText(Path.Combine(folder, "EN", "docs", "later.md"), "late");
+            Assert.Equal("x", Display.Doc("EN", "docs/later.md", "x"));
+        }
+        finally
+        {
+            Directory.Delete(folder, true);
+        }
     }
 
     [Fact]

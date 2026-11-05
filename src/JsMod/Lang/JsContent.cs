@@ -28,6 +28,15 @@ namespace JsMod.Lang
         private static volatile Dictionary<string, string> spans = new Dictionary<string, string>();
         private static volatile Dictionary<string, string> examples = new Dictionary<string, string>();
         private static volatile HashSet<string> exampleCode = new HashSet<string>();
+        private static volatile HashSet<string> knownJs = new HashSet<string>();
+        private static volatile HashSet<string> overridePages = new HashSet<string>();
+
+        // Strings first, so words inside them don't count.
+        private static readonly Regex QuotedText = new Regex("\"[^\"\n]*\"|'[^'\n]*'", RegexOptions.Compiled);
+
+        private static readonly Regex PythonSyntax = new Regex(
+            @"\b(def|elif|pass|global|True|False|None|and|or|not)\b|(^|\s)#|:[ \t]*($|\n)|\bfor\s+\w+(\s*,\s*\w+)*\s+in\b|(^|\n)\s*(import|from)\s+\w",
+            RegexOptions.Compiled);
 
         /// <summary>Told once about each example or file that couldn't be mapped.</summary>
         public static volatile Action<string> Warn;
@@ -38,12 +47,45 @@ namespace JsMod.Lang
         public static void Load(string contentFolder)
         {
             folder = contentFolder;
-            spans = ReadPairs(Path.Combine(contentFolder, SpansFile));
-            Dictionary<string, string> loaded = ReadPairs(Path.Combine(contentFolder, ExamplesFile));
+            Dictionary<string, string> loadedSpans;
+            Dictionary<string, string> loaded;
+            if (Directory.Exists(contentFolder))
+            {
+                loadedSpans = ReadPairs(Path.Combine(contentFolder, SpansFile));
+                loaded = ReadPairs(Path.Combine(contentFolder, ExamplesFile));
+            }
+            else
+            {
+                Warn?.Invoke("Missing the folder " + contentFolder + ", which has to sit beside JsMod.dll. Without it, code in the game's text stays Python.");
+                loadedSpans = new Dictionary<string, string>();
+                loaded = new Dictionary<string, string>();
+            }
+            spans = loadedSpans;
             examples = loaded;
             exampleCode = new HashSet<string>(loaded.Values);
+            var js = new HashSet<string>(loaded.Values);
+            js.UnionWith(loadedSpans.Values);
+            knownJs = js;
+            overridePages = ListOverridePages(contentFolder);
             TagCache.Clear();
             LoggedMisses.Clear();
+        }
+
+        /// <summary>The whole pages in the folder, as "language/doc". Read once, because the game asks for docs on every hover.</summary>
+        private static HashSet<string> ListOverridePages(string contentFolder)
+        {
+            var pages = new HashSet<string>();
+            if (Directory.Exists(contentFolder))
+            {
+                foreach (string language in Directory.GetDirectories(contentFolder))
+                {
+                    foreach (string file in Directory.GetFiles(language, "*", SearchOption.AllDirectories))
+                    {
+                        pages.Add(file.Substring(contentFolder.Length).Replace('\\', '/').TrimStart('/'));
+                    }
+                }
+            }
+            return pages;
         }
 
         private static Dictionary<string, string> ReadPairs(string path)
@@ -110,6 +152,19 @@ namespace JsMod.Lang
             }
             Finish();
             return pairs;
+        }
+
+        /// <summary>
+        /// Whether code outside any window should be coloured as JavaScript: it has to be code this class supplied, or at least not
+        /// look like Python. Without the content files, everything is still Python.
+        /// </summary>
+        public static bool ColoursAsJs(string code)
+        {
+            if (knownJs.Count == 0 || code == null)
+            {
+                return false;
+            }
+            return knownJs.Contains(code) || !PythonSyntax.IsMatch(QuotedText.Replace(code, "\"\""));
         }
 
         /// <summary>Swaps code between backticks, splitting the text the way the game's ApplyCodeTags does. The result depends only on the text, so it's cached by it.</summary>
@@ -185,19 +240,16 @@ namespace JsMod.Lang
         public static string PageOverride(string language, string doc)
         {
             string root = folder;
-            if (root == null || string.IsNullOrEmpty(doc) || doc.Contains(".."))
+            HashSet<string> pages = overridePages;
+            if (root == null || pages.Count == 0 || string.IsNullOrEmpty(doc))
             {
                 return null;
             }
             foreach (string candidate in new[] { language, "EN" })
             {
-                if (!string.IsNullOrEmpty(candidate))
+                if (!string.IsNullOrEmpty(candidate) && pages.Contains(candidate + "/" + doc.Replace('\\', '/')))
                 {
-                    string path = Path.Combine(root, candidate, doc);
-                    if (File.Exists(path))
-                    {
-                        return File.ReadAllText(path);
-                    }
+                    return File.ReadAllText(Path.Combine(root, candidate, doc));
                 }
             }
             return null;

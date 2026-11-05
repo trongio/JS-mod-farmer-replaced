@@ -57,6 +57,7 @@ namespace JsMod.Lang
         private readonly HashSet<string> allVars = new HashSet<string>();
         private readonly HashSet<string> importedModules = new HashSet<string>();
         private readonly HashSet<string> modules = new HashSet<string>();
+        private readonly HashSet<string> topLevelNames = new HashSet<string>();
         private readonly int endOfSource;
         private FunctionScope scope = new FunctionScope(null);
         private int pos;
@@ -90,6 +91,7 @@ namespace JsMod.Lang
             {
                 pos++;
             }
+            FindTopLevelNames();
             var body = new List<Node>();
             SkipNewLines();
             while (Current != null)
@@ -1038,8 +1040,32 @@ namespace JsMod.Lang
             return new BinaryExprNode("//", TokenType.MULT, window, start, end) { slots = { value, one } };
         }
 
+        /// <summary>A file's own Math or console wins even in a function above its declaration, so these are known before parsing starts.</summary>
+        private void FindTopLevelNames()
+        {
+            int depth = 0;
+            for (int i = 0; i + 1 < tokens.Count; i++)
+            {
+                Token token = tokens[i];
+                if (token.type == JsTokenizer.Punct)
+                {
+                    depth += token.value == "{" || token.value == "(" || token.value == "[" ? 1 : 0;
+                    depth -= token.value == "}" || token.value == ")" || token.value == "]" ? 1 : 0;
+                }
+                else if (depth == 0 && token.type == JsTokenizer.Keyword && tokens[i + 1].type == TokenType.IDENTIFIER
+                    && (token.value == "let" || token.value == "const" || token.value == "var" || token.value == "function"))
+                {
+                    topLevelNames.Add(tokens[i + 1].value);
+                }
+            }
+        }
+
         private bool IsDeclared(string name)
         {
+            if (topLevelNames.Contains(name))
+            {
+                return true;
+            }
             for (FunctionScope s = scope; s != null; s = s.Parent)
             {
                 if (s.Vars.Contains(name))

@@ -46,18 +46,47 @@ namespace JsMod.Lang
 
         public static string Doc(string language, string docName, string doc)
         {
-            if (!LanguageMode.SettingIsJs)
+            // The game asks for pages to find out whether they exist, so a page only we have must still look missing.
+            if (!LanguageMode.SettingIsJs || string.IsNullOrEmpty(doc))
             {
                 return doc;
             }
             return JsContent.PageOverride(language, docName) ?? JsContent.MapExamples(doc, docName);
         }
 
+        // Inside str(), the calling file's language decides. Everywhere else, the setting does.
+        private const int NoStrCall = 0;
+        private const int StrInPython = 1;
+        private const int StrInJs = 2;
+
+        // Per thread, because each simulation runs str() on its own thread.
+        [ThreadStatic]
+        private static int strCall;
+
+        /// <summary>True when str() called from this file spells values the JS way. Python mode is always stock, whatever the file says.</summary>
+        public static bool StrIsJs(string code, CodeWindow window)
+        {
+            return (object)window != null && code != null && LanguageMode.SettingIsJs && LanguageMode.IsJs(code, window);
+        }
+
+        public static int EnterStr(bool isJs)
+        {
+            int outer = strCall;
+            strCall = isJs ? StrInJs : StrInPython;
+            return outer;
+        }
+
+        public static void ExitStr(int outer)
+        {
+            strCall = outer;
+        }
+
         /// <summary>True when the value has a JS spelling, which is then in text.</summary>
         public static bool NiceString(object value, out string text)
         {
             text = null;
-            if (!LanguageMode.SettingIsJs)
+            bool js = strCall == NoStrCall ? LanguageMode.SettingIsJs : strCall == StrInJs;
+            if (!js)
             {
                 return false;
             }
@@ -138,8 +167,9 @@ namespace JsMod.Lang
         }
 
         /// <summary>
-        /// A '}' typed first on a line moves back one indent level. Returns false when there's nothing to do. Otherwise text and
-        /// caret are the edited values. The caret is straight after the brace.
+        /// A '}' typed first on a line lines up with the line that opened its block, and is left alone if it's already there or
+        /// further left. With no opener in the text it moves back one indent, as the file measures one. Returns false when
+        /// there's nothing to do. Otherwise text and caret are the edited values. The caret is straight after the brace.
         /// </summary>
         public static bool OutdentClosingBrace(ref string text, ref int caret)
         {
@@ -148,20 +178,114 @@ namespace JsMod.Lang
             {
                 return false;
             }
-            int lineStart = brace;
-            while (lineStart > 0 && text[lineStart - 1] != '\n')
-            {
-                lineStart--;
-            }
+            int lineStart = LineStart(text, brace);
             int indent = brace - lineStart;
             if (indent == 0 || text.Substring(lineStart, indent).Trim().Length != 0)
             {
                 return false;
             }
-            int remove = text[brace - 1] == '\t' ? 1 : Math.Min(4, indent);
-            text = text.Remove(brace - remove, remove);
-            caret -= remove;
+            int opener = OpeningBrace(text, brace);
+            string target;
+            if (opener >= 0)
+            {
+                target = LeadingWhitespace(text, LineStart(text, opener));
+            }
+            else
+            {
+                target = text.Substring(lineStart, indent - Math.Min(IndentUnit(text, lineStart), indent));
+            }
+            if (target.Length >= indent)
+            {
+                return false;
+            }
+            text = text.Substring(0, lineStart) + target + text.Substring(brace);
+            caret -= indent - target.Length;
             return true;
+        }
+
+        private static int LineStart(string text, int position)
+        {
+            while (position > 0 && text[position - 1] != '\n')
+            {
+                position--;
+            }
+            return position;
+        }
+
+        private static string LeadingWhitespace(string text, int lineStart)
+        {
+            int end = lineStart;
+            while (end < text.Length && (text[end] == ' ' || text[end] == '\t'))
+            {
+                end++;
+            }
+            return text.Substring(lineStart, end - lineStart);
+        }
+
+        /// <summary>The '{' this '}' closes, skipping strings and comments, or -1.</summary>
+        private static int OpeningBrace(string text, int brace)
+        {
+            var open = new Stack<int>();
+            for (int i = 0; i < brace; i++)
+            {
+                char c = text[i];
+                if (c == '/' && i + 1 < brace && text[i + 1] == '/')
+                {
+                    while (i < brace && text[i] != '\n')
+                    {
+                        i++;
+                    }
+                }
+                else if (c == '/' && i + 1 < brace && text[i + 1] == '*')
+                {
+                    int end = text.IndexOf("*/", i + 2, StringComparison.Ordinal);
+                    if (end < 0 || end >= brace)
+                    {
+                        return -1;
+                    }
+                    i = end + 1;
+                }
+                else if (c == '"' || c == '\'' || c == '`')
+                {
+                    i++;
+                    while (i < brace && text[i] != c && (c == '`' || text[i] != '\n'))
+                    {
+                        i++;
+                    }
+                }
+                else if (c == '{')
+                {
+                    open.Push(i);
+                }
+                else if (c == '}' && open.Count > 0)
+                {
+                    open.Pop();
+                }
+            }
+            return open.Count > 0 ? open.Peek() : -1;
+        }
+
+        /// <summary>A tab, or the smallest indent on any other line, or 4 if no other line has one.</summary>
+        private static int IndentUnit(string text, int ownLineStart)
+        {
+            if (text[ownLineStart] == '\t')
+            {
+                return 1;
+            }
+            int unit = int.MaxValue;
+            int start = 0;
+            while (start < text.Length)
+            {
+                int end = text.IndexOf('\n', start);
+                end = end < 0 ? text.Length : end;
+                int width = LeadingWhitespace(text, start).Length;
+                if (start != ownLineStart && width > 0 && width < end - start && width < unit)
+                {
+                    unit = width;
+                }
+                start = end + 1;
+            }
+            return unit == int.MaxValue ? 4 : unit;
         }
     }
 }

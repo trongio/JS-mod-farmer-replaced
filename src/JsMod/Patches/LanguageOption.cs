@@ -111,6 +111,37 @@ namespace JsMod.Patches
             {
                 Reparse();
                 RefreshDocs();
+                RefreshShownText();
+            }
+        }
+
+        /// <summary>Labels only re-read their text when the display language changes, and unlock boxes only when their state does.</summary>
+        private static void RefreshShownText()
+        {
+            foreach (TMPTextLocalizer label in UnityEngine.Object.FindObjectsByType<TMPTextLocalizer>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                try
+                {
+                    label.LocalizeText();
+                }
+                catch (Exception ex)
+                {
+                    // A label that has never been active has nothing to refresh, and reads its text when it wakes.
+                    Plugin.Log.LogDebug("Skipped a label after the language changed: " + ex.Message);
+                }
+            }
+            try
+            {
+                // The game's own way to make a box redraw, which it uses when the theme changes. The box redraws when the tech tree next updates.
+                MethodInfo redraw = AccessTools.Method(typeof(UnlockBox), "OnThemeChanged");
+                foreach (UnlockBox box in UnityEngine.Object.FindObjectsByType<UnlockBox>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    redraw.Invoke(box, new object[] { null });
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning("Could not refresh the tech tree after the language changed: " + ex.Message);
             }
         }
 

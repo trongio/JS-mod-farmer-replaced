@@ -38,6 +38,35 @@ namespace JsMod.Patches
         }
     }
 
+    /// <summary>
+    /// str() makes values a program can compare and use as keys, so unlike what's only displayed, it follows the file calling it.
+    /// CallNode sets the executing node before calling, and that node belongs to the calling file, even inside an imported function.
+    /// </summary>
+    [HarmonyPatch(typeof(BuiltinFunctions), "StringConstructor")]
+    internal static class StrScopePatch
+    {
+        private static void Prefix(Execution exec, int droneId, out int __state)
+        {
+            bool isJs = false;
+            try
+            {
+                CodeWindow window = exec.States[droneId].CurrentExecutingNode?.boxedParams?.codeWindow;
+                isJs = (object)window != null && Display.StrIsJs(window.CodeInput?.text, window);
+            }
+            catch (System.Exception ex)
+            {
+                // Stock spelling, because a failure here must not stop the player's program.
+                Plugin.Log.LogDebug("Could not find the file calling str(): " + ex.Message);
+            }
+            __state = Display.EnterStr(isJs);
+        }
+
+        private static void Finalizer(int __state)
+        {
+            Display.ExitStr(__state);
+        }
+    }
+
     /// <summary>print, str, hover values and errors all format values here, including ones inside lists.</summary>
     [HarmonyPatch(typeof(CodeUtilities), nameof(CodeUtilities.ToNiceString))]
     internal static class NiceStringPatch
