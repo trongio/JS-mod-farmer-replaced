@@ -24,5 +24,7 @@ With the programming language set to JavaScript, every piece of code the game sh
 - [ ] JS mode: docs code examples are JS and run
 - [ ] JS mode: pages about language syntax describe JS, in English and Georgian
 - [ ] JS mode: tooltips and error messages show JS syntax
+- [ ] JS mode: the editor is fully JS: colours, autocomplete and its descriptions, indenting, comment shortcuts, signature hints and error text
+- [ ] JS mode: external editor files and stubs suit JS, or the gap is documented
 - [ ] JS features the examples need exist in the JS parser
 - [ ] Python mode: all of this text is unchanged
