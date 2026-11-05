@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    The plugin's language code built for net9. It's a separate assembly because JsForNode derives from a game type: xunit
+    enumerates the test assembly's types before the game assembly resolver can run, and would fail on that base class.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/JsMod/Lang/*.cs" LinkBase="Lang" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Core"><HintPath>$(ManagedDir)/Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Utils"><HintPath>$(ManagedDir)/Utils.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>

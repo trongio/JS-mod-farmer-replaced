@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!-- Override with: dotnet build -p:GameDir="/path/to/The Farmer Was Replaced" or the TFWR_GAME_DIR environment variable. -->
+    <GameDir Condition="'$(GameDir)' == '' And '$(TFWR_GAME_DIR)' != ''">$(TFWR_GAME_DIR)</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">/media/azael/Storage/SteamLibrary/steamapps/common/The Farmer Was Replaced</GameDir>
+    <ManagedDir Condition="'$(ManagedDir)' == ''">$(GameDir)/TheFarmerWasReplaced_Data/Managed</ManagedDir>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+</Project>

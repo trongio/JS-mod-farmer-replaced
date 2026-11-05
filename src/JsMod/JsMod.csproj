@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>JsMod</AssemblyName>
+    <RootNamespace>JsMod</RootNamespace>
+    <Product>JsMod</Product>
+    <Version>0.1.0</Version>
+    <BepInExPluginGuid>trongio.tfwr.jsmod</BepInExPluginGuid>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <!-- Set -p:Deploy=true to copy the built plugin into BepInEx/plugins/JsMod in the game folder. -->
+    <Deploy Condition="'$(Deploy)' == ''">false</Deploy>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Game assemblies: compile-time only, never copied to output. -->
+    <Reference Include="Core"><HintPath>$(ManagedDir)/Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Utils"><HintPath>$(ManagedDir)/Utils.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ManagedDir)/UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Unity.TextMeshPro"><HintPath>$(ManagedDir)/Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UI"><HintPath>$(ManagedDir)/UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.UIModule"><HintPath>$(ManagedDir)/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(Deploy)' == 'true'">
+    <Error Condition="!Exists('$(GameDir)/BepInEx')" Text="BepInEx is not installed in $(GameDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)/BepInEx/plugins/JsMod" />
+  </Target>
+</Project>

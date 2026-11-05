@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CS0436;MSB3277</NoWarn>
+    <EnableNUnitRunner>false</EnableNUnitRunner>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../JsMod.LangForTests/JsMod.LangForTests.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Game assemblies are resolved at run time from ManagedDir and never copied to output. -->
+    <Reference Include="Core"><HintPath>$(ManagedDir)/Core.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Utils"><HintPath>$(ManagedDir)/Utils.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ManagedDir</_Parameter1>
+      <_Parameter2>$(ManagedDir)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
