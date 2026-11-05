@@ -11,7 +11,7 @@ namespace JsMod.Patches
         private static bool Prefix(CodeWindow __instance, string inserted)
         {
             var input = __instance.CodeInput;
-            if (!JsMarker.IsJs(input.text))
+            if (!LanguageMode.IsJs(input.text, __instance))
             {
                 return true;
             }
@@ -46,7 +46,7 @@ namespace JsMod.Patches
 
         private static void Postfix(CodeWindow __instance, ref List<string> __result)
         {
-            if (!JsMarker.IsJs(__instance.CodeInput.text))
+            if (!LanguageMode.IsJs(__instance.CodeInput.text, __instance))
             {
                 return;
             }

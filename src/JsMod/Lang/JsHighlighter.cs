@@ -17,7 +17,7 @@ namespace JsMod.Lang
         /// <summary>Called from the patched highlighter in place of its hardcoded pattern.</summary>
         public static string Select(string original, string code)
         {
-            return JsMarker.IsJs(code) ? Pattern : original;
+            return LanguageMode.IsJsWhileColouring(code) ? Pattern : original;
         }
     }
 }

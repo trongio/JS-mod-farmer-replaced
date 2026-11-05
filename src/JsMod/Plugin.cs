@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -45,7 +46,41 @@ namespace JsMod
             PatchOptional(harmony, typeof(HighlightPatch));
             PatchOptional(harmony, typeof(AutoIndentPatch));
             PatchOptional(harmony, typeof(WordListPatch));
-            Log.LogInfo("JsMod loaded. Start a code window with // @js to write JavaScript. Leaderboard submission is off.");
+            PatchLanguageOption(harmony);
+            Log.LogInfo("JsMod loaded. Choose the programming language in Options > General, or start a file with // @js or # @py. Leaderboard submission is off.");
+        }
+
+        /// <summary>All or nothing. The setting stays off until every part is in, and without it the markers still work.</summary>
+        private static void PatchLanguageOption(Harmony harmony)
+        {
+            try
+            {
+                harmony.CreateClassProcessor(typeof(TokenScopePatch)).Patch();
+                harmony.CreateClassProcessor(typeof(ColourScopePatch)).Patch();
+                harmony.CreateClassProcessor(typeof(LocalizePatch)).Patch();
+                harmony.CreateClassProcessor(typeof(OptionMenuPatch)).Patch();
+                LanguageOption.Enable();
+            }
+            catch (Exception ex)
+            {
+                MethodBase[] targets =
+                {
+                    AccessTools.Method(typeof(CodeWindow), nameof(CodeWindow.UpdateTokens)),
+                    AccessTools.Method(typeof(CodeWindow), nameof(CodeWindow.UpdateSearch)),
+                    AccessTools.Method(typeof(CodeWindow), "OnThemeChanged"),
+                    AccessTools.Method(typeof(Localizer), nameof(Localizer.Localize)),
+                    AccessTools.Method(typeof(OptionMenu), nameof(OptionMenu.Setup))
+                };
+                foreach (MethodBase target in targets)
+                {
+                    // Null when the failure was the game renaming this very method.
+                    if (target != null)
+                    {
+                        harmony.Unpatch(target, HarmonyPatchType.All, harmony.Id);
+                    }
+                }
+                Log.LogWarning("Could not add the programming language option, so plain code stays Python. The // @js marker still works: " + ex);
+            }
         }
 
         private static void PatchOptional(Harmony harmony, Type patch)

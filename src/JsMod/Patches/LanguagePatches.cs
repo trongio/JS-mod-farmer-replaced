@@ -10,7 +10,7 @@ namespace JsMod.Patches
     {
         private static bool Prefix(string code, ref TokenStream stream, ref bool __result)
         {
-            if (!JsMarker.IsJs(code))
+            if (!LanguageMode.IsJsWhileTokenizing(code))
             {
                 return true;
             }
