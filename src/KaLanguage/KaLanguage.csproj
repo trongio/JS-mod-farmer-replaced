@@ -10,6 +10,8 @@
     <GameDir Condition="'$(GameDir)' == '' And '$(TFWR_GAME_DIR)' != ''">$(TFWR_GAME_DIR)</GameDir>
     <GameDir Condition="'$(GameDir)' == ''">/media/azael/Storage/SteamLibrary/steamapps/common/The Farmer Was Replaced</GameDir>
     <ManagedDir>$(GameDir)/TheFarmerWasReplaced_Data/Managed</ManagedDir>
+    <!-- Set -p:Deploy=true to copy the built plugin into BepInEx/plugins/KaLanguage in the game folder. -->
+    <Deploy Condition="'$(Deploy)' == ''">false</Deploy>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,7 +39,8 @@
     <Copy SourceFiles="@(FontFile)" DestinationFolder="$(OutDir)fonts" SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="DeployToGame" AfterTargets="CopyPack" Condition="Exists('$(GameDir)/BepInEx')">
+  <Target Name="DeployToGame" AfterTargets="CopyPack" Condition="'$(Deploy)' == 'true'">
+    <Error Condition="!Exists('$(GameDir)/BepInEx')" Text="BepInEx is not installed in $(GameDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)/BepInEx/plugins/KaLanguage" />
     <Copy SourceFiles="@(PackFile)" DestinationFiles="@(PackFile->'$(GameDir)/BepInEx/plugins/KaLanguage/KA/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(FontFile)" DestinationFolder="$(GameDir)/BepInEx/plugins/KaLanguage/fonts" SkipUnchangedFiles="true" />
