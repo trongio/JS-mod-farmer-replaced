@@ -1,0 +1,17 @@
+@warning_not_enough_items_to_trade = სცადე {0} ეყიდა, მაგრამ საჭირო რესურსები არ გქონდა.
+@warning_no_space_to_plant = სცადე {0} დაგერგო, მაგრამ იქ უკვე რაღაც იყო.
+@warning_cant_plant_on_ground = {0} ვერ დაირგვება ამ მიწაზე: {1}.
+@warning_missing_seed = დასარგავად საჭირო ნივთები არ გქონდა: {0}.
+@warning_not_enough_coal = რკინის საძიებლად საკმარისი ქვანახშირი არ გქონდა.
+@warning_not_enough_iron = კვარცის საძიებლად საკმარისი რკინა არ გქონდა.
+@warning_no_item_to_use = სცადე {0} გამოგეყენებინა, მაგრამ საკმარისი არ გქონდა.
+@warning_cannot_place_ground = {0} ვერ განთავსდება, რადგან ეს სპეციალური ბლოკია.
+@warning_failed_swap_wrap = სცადე გაცვლა ფერმის საზღვრებს გადაღმა. ეს დაუშვებელია.
+@warning_failed_swap_unswappable = სცადე {0} გაგეცვალა, მაგრამ მისი გაცვლა შეუძლებელია.
+@warning_weird_substance_not_divisible = გამოიყენე უცნაური სუბსტანციის ისეთი რაოდენობა, რომელიც ზუსტად არ ემთხვევა ლაბირინთის შესაქმნელად საჭირო რაოდენობას. არ დაგავიწყდეს, რომ ლაბირინთის გაუმჯობესებისას საჭირო უცნაური სუბსტანციის რაოდენობა იზრდება.
+
+სრული ზომის ლაბირინთის შესაქმნელად გააკეთე ეს:
+`plant(Entities.Bush)
+substance = get_world_size() * 2**(num_unlocked(Unlocks.Mazes) - 1)
+use_item(Items.Weird_Substance, substance)`
+@warning_recursive_simulation = სიმულაციებისა და რეიტინგის გარბენების დაწყება სხვა სიმულაციის ან რეიტინგის გარბენის შიგნიდან შეუძლებელია.

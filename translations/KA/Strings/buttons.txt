@@ -1,0 +1,17 @@
+@save = შენახვა
+@saved = შენახულია
+@play = დაწყება
+@load = ჩატვირთვა
+@options = პარამეტრები
+@join_discord = Discord
+@quit = გასვლა
+@open_folder = საქაღალდის გახსნა
+@new_game = ახალი თამაში
+@back = უკან
+@unlocks = განბლოკვები
+@farm = ფერმა
+@unlocked = განბლოკილია
+@upgrade = გაუმჯობესება
+@max_level = მაქსიმალური დონე
+@unlock = განბლოკვა
+@locked = დაბლოკილია
