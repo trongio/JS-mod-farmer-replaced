@@ -48,7 +48,9 @@ namespace JsMod.Patches
             }
             try
             {
-                return WithOurOption(options.ToList());
+                List<OptionSO> all = WithOurOption(options.ToList());
+                AddEditorRows(all);
+                return all;
             }
             catch (Exception ex)
             {
@@ -59,6 +61,19 @@ namespace JsMod.Patches
                 Reparse();
                 Plugin.Log.LogWarning("Could not add the programming language row, so plain code stays Python. The // @js marker still works: " + ex);
                 return options;
+            }
+        }
+
+        private static void AddEditorRows(List<OptionSO> options)
+        {
+            try
+            {
+                Editor.Game.EditorOptions.AddRows(options);
+            }
+            catch (Exception ex)
+            {
+                // The shortcuts keep their default keys. Only choosing other keys is lost.
+                Plugin.Log.LogWarning("Could not add the editor settings: " + ex.Message);
             }
         }
 

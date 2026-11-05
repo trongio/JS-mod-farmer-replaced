@@ -4,6 +4,7 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using JsMod.Editor.Game;
 using JsMod.Lang;
 using JsMod.Patches;
 
@@ -64,6 +65,13 @@ namespace JsMod
             PatchOptional(harmony, typeof(ImportCompletionPatch));
             PatchOptional(harmony, typeof(SignaturePatch));
             PatchOptional(harmony, typeof(KeywordTooltipPatch));
+            // The editor upgrade only changes text the player asks it to, and each part turns itself off if its patch fails.
+            PatchOptional(harmony, typeof(EditorKeysPatch));
+            PatchOptional(harmony, typeof(FormatOnRunPatch));
+            PatchOptional(harmony, typeof(WindowButtonsPatch));
+            PatchOptional(harmony, typeof(ExampleCopyPatch));
+            PatchOptional(harmony, typeof(ShortcutsDocPatch));
+            OptionHolder.OnOptionChanged += EditorOptions.OnOptionChanged;
             Log.LogInfo("JsMod loaded. Choose the programming language in Options > General, or start a file with // @js or # @py. Leaderboard submission is off.");
         }
 
