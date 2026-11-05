@@ -559,6 +559,30 @@ public class EditorTests
     }
 
     [Fact]
+    public void UndoAndRedoTooltipsNameTheLiveKeys()
+    {
+        Assert.Equal("Undo", WithKeys(_ => "", "editor button undo", "EN"));
+        Assert.Equal("გაუქმება (Ctrl Z)", WithKeys(o => o == "undo" ? "Ctrl Z" : "", "editor button undo", "KA"));
+        Assert.Equal("Redo (Ctrl Shift Z / Ctrl Y)", WithKeys(o => o == "redo 1" ? "Ctrl Shift Z" : "Ctrl Y", "editor button redo", "EN"));
+        Assert.Equal("Redo (Ctrl Shift Z)", WithKeys(o => o == "redo 1" ? "Ctrl Shift Z" : "", "editor button redo", "EN"));
+        Assert.Equal("Format this code.", WithKeys(_ => "X", "editor button format", "EN"));
+    }
+
+    private static string WithKeys(Func<string, string> keys, string key, string language)
+    {
+        Func<string, string> before = ModStrings.KeysFor;
+        ModStrings.KeysFor = keys;
+        try
+        {
+            return ModStrings.Lookup(key, language);
+        }
+        finally
+        {
+            ModStrings.KeysFor = before;
+        }
+    }
+
+    [Fact]
     public void ThePresetSwapsRedoAndDeleteLine()
     {
         var redo = EditorBindings.Preset.Single(p => p.option == "redo 2");
@@ -578,7 +602,7 @@ public class EditorTests
         {
             EditorBindings.MasterOption, EditorBindings.FormatOnRunOption, EditorBindings.FormatOnSaveOption, EditorBindings.KeymapOption,
             EditorBindings.MasterOption + " tooltip", EditorBindings.FormatOnRunOption + " tooltip", EditorBindings.FormatOnSaveOption + " tooltip", EditorBindings.KeymapOption + " tooltip",
-            "editor shortcut tooltip", "editor button format", "editor button copy", "editor button help", "editor copy label", "editor copied label", "editor format unsafe",
+            "editor shortcut tooltip", "editor button undo", "editor button redo", "editor undo label", "editor redo label", "editor button format", "editor button copy", "editor button help", "editor copy label", "editor copied label", "editor format unsafe",
             "editor shortcuts title", "editor shortcuts intro", "editor shortcut unbound"
         }))
         {

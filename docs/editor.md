@@ -53,7 +53,7 @@ The game checks its own keys, such as run and save, separately from the editor. 
 
 ## Buttons
 
-Code windows get `{ }` (format) beside the run and step buttons, plus `?` (shortcuts) and `Copy` beside minimize. Docs examples get `Copy`, which copies the code shown, in the current language, without any setup code.
+Code windows get `{ }` (format), `Undo` and `Redo` beside the run and step buttons, plus `?` (shortcuts) and `Copy` beside minimize. Docs examples get `Copy`, which copies the code shown, in the current language, without any setup code.
 
 ## Not included
 

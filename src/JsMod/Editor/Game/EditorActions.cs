@@ -83,6 +83,31 @@ namespace JsMod.Editor.Game
             }
         }
 
+        /// <summary>What the game's undo and redo keys call, for this window. Those act on the active window, so it becomes active first.</summary>
+        internal static void UndoOrRedo(CodeWindow window, bool undo)
+        {
+            try
+            {
+                if (!CanEdit(window))
+                {
+                    return;
+                }
+                window.workspace.activeWindow = window.GetComponent<Window>();
+                if (undo)
+                {
+                    window.workspace.Undo();
+                }
+                else
+                {
+                    window.workspace.Redo();
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning((undo ? "Undo" : "Redo") + " failed: " + ex.Message);
+            }
+        }
+
         /// <summary>Silent is for format on run and on save: bad code just stays as it is, and the run reports its own errors.</summary>
         internal static void Format(CodeWindow window, bool silent)
         {

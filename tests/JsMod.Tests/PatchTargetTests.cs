@@ -62,6 +62,9 @@ public class PatchTargetTests
         Assert.NotNull(typeof(CodeWindow).GetField("undoChangeTime", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("breakpointPanel", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("minWidth", Any));
+        AssertTarget(typeof(Workspace), "Undo");
+        AssertTarget(typeof(Workspace), "Redo");
+        Assert.NotNull(typeof(WorkspaceBase).GetField("activeWindow", Any) ?? typeof(Workspace).GetField("activeWindow", Any));
         Assert.NotNull(typeof(ColoredButton).GetField("holdDuration", Any));
         Assert.NotNull(typeof(ColoredButton).GetField("onHeld", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("executeButton", Any));

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using HarmonyLib;
+using JsMod.Lang;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -36,36 +37,46 @@ namespace JsMod.Editor.Game
             {
                 throw new InvalidOperationException("The code window has no MinimizeButton to copy.");
             }
-            AddFormatButton(window, source);
+            float leftWidth = AddLeftButtons(window, source);
             AddButton(source, window.transform, "?", "editor button help", new Vector2(-116f, source.GetComponent<RectTransform>().anchoredPosition.y), 35f, () => window.workspace.AddNewDocsWindow(EditorBindings.ShortcutsDoc));
             ColoredButton copy = null;
             copy = AddButton(source, window.transform, Localizer.Localize("editor copy label"), "editor button copy", new Vector2(-176f, source.GetComponent<RectTransform>().anchoredPosition.y), 65f, () => Copy(window, copy));
             var tag = copy.GetComponent<EditorButtonTag>();
             var minWidth = Traverse.Create(window).Field("minWidth");
-            minWidth.SetValue(minWidth.GetValue<float>() + WidthForHeaderButtons);
+            minWidth.SetValue(minWidth.GetValue<float>() + WidthForHeaderButtons + leftWidth);
             tag.Widened = window;
-            tag.ExtraWidth = WidthForHeaderButtons;
+            tag.ExtraWidth = WidthForHeaderButtons + leftWidth;
         }
 
-        /// <summary>Sits beside the run and step buttons, one gap further along, and moves the file name over to make room.</summary>
-        private static void AddFormatButton(CodeWindow window, Transform source)
+        /// <summary>Format, undo and redo follow the run and step buttons at the same spacing, and the file name moves over to make room. Returns the extra width past format.</summary>
+        private static float AddLeftButtons(CodeWindow window, Transform source)
         {
+            ModStrings.KeysFor = option => OptionHolder.GetKeyCombination(option).ToString().Trim();
             var traverse = Traverse.Create(window);
             var run = (RectTransform)traverse.Field("executeButton").GetValue<ColoredButton>().transform;
             var step = (RectTransform)traverse.Field("stepByStepButton").GetValue<ColoredButton>().transform;
             float gap = step.anchoredPosition.x - run.anchoredPosition.x;
-            ColoredButton format = AddButton(source, window.transform, "{ }", "editor button format", Vector2.zero, step.sizeDelta.x, () => EditorActions.Format(window, false));
-            var rect = (RectTransform)format.transform;
+            ColoredButton format = AddBesideStep(source, window, step, gap, "{ }", "editor button format", () => EditorActions.Format(window, false));
+            AddBesideStep(source, window, step, gap * 2f, Localizer.Localize("editor undo label"), "editor button undo", () => EditorActions.UndoOrRedo(window, true));
+            AddBesideStep(source, window, step, gap * 3f, Localizer.Localize("editor redo label"), "editor button redo", () => EditorActions.UndoOrRedo(window, false));
+            var name = (RectTransform)traverse.Field("fileNameText").GetValue<TMP_InputField>().transform;
+            name.offsetMin += new Vector2(gap * 3f, 0f);
+            var tag = format.GetComponent<EditorButtonTag>();
+            tag.MovedName = name;
+            tag.NameShift = gap * 3f;
+            return gap * 2f;
+        }
+
+        private static ColoredButton AddBesideStep(Transform source, CodeWindow window, RectTransform step, float offset, string label, string tooltip, Action clicked)
+        {
+            ColoredButton button = AddButton(source, window.transform, label, tooltip, Vector2.zero, step.sizeDelta.x, clicked);
+            var rect = (RectTransform)button.transform;
             rect.anchorMin = step.anchorMin;
             rect.anchorMax = step.anchorMax;
             rect.pivot = step.pivot;
             rect.sizeDelta = step.sizeDelta;
-            rect.anchoredPosition = step.anchoredPosition + new Vector2(gap, 0f);
-            var name = (RectTransform)traverse.Field("fileNameText").GetValue<TMP_InputField>().transform;
-            name.offsetMin += new Vector2(gap, 0f);
-            var tag = format.GetComponent<EditorButtonTag>();
-            tag.MovedName = name;
-            tag.NameShift = gap;
+            rect.anchoredPosition = step.anchoredPosition + new Vector2(offset, 0f);
+            return button;
         }
 
         internal static void AddToExample(CodeWindow codeWindow, GameObject executeButton)

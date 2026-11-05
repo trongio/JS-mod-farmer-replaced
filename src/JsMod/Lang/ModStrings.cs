@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace JsMod.Lang
 {
@@ -55,6 +56,10 @@ namespace JsMod.Lang
             ["editor parameter info"] = new[] { "Parameter info", "პარამეტრების ინფორმაცია" },
             ["editor button format"] = new[] { "Format this code.", "დააფორმატე ეს კოდი." },
             ["editor button copy"] = new[] { "Copy this code.", "დააკოპირე ეს კოდი." },
+            ["editor button undo"] = new[] { "Undo", "გაუქმება" },
+            ["editor button redo"] = new[] { "Redo", "გამეორება" },
+            ["editor undo label"] = new[] { "Undo", "უკან" },
+            ["editor redo label"] = new[] { "Redo", "წინ" },
             ["editor button help"] = new[] { "Editor shortcuts.", "რედაქტორის მალსახმობები." },
             ["editor copy label"] = new[] { "Copy", "ასლი" },
             ["editor copied label"] = new[] { "Copied", "დაკოპირდა" },
@@ -72,6 +77,16 @@ namespace JsMod.Lang
             ["editor shortcut unbound"] = new[] { "Not set", "მინიჭებული არ არის" }
         };
 
+        // Tooltips that end with the keys currently bound to these game options.
+        private static readonly Dictionary<string, string[]> KeyedTooltips = new Dictionary<string, string[]>
+        {
+            ["editor button undo"] = new[] { "undo" },
+            ["editor button redo"] = new[] { "redo 1", "redo 2" }
+        };
+
+        /// <summary>The keys bound to a game option, or empty when none. Set once the game's options are available.</summary>
+        public static System.Func<string, string> KeysFor;
+
         /// <summary>The text for a key, or null when the key isn't one of ours.</summary>
         public static string Lookup(string key, string language)
         {
@@ -79,7 +94,13 @@ namespace JsMod.Lang
             {
                 return null;
             }
-            return language == "KA" ? text[1] : text[0];
+            string value = language == "KA" ? text[1] : text[0];
+            if (KeysFor != null && KeyedTooltips.TryGetValue(key, out string[] options))
+            {
+                string keys = string.Join(" / ", options.Select(KeysFor).Where(k => !string.IsNullOrEmpty(k)));
+                return keys.Length == 0 ? value : value + " (" + keys + ")";
+            }
+            return value;
         }
     }
 }
