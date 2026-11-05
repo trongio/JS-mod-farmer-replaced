@@ -110,6 +110,23 @@ namespace JsMod.Patches
             if (item == LanguageMode.OptionName && !seeding)
             {
                 Reparse();
+                RefreshDocs();
+            }
+        }
+
+        /// <summary>Open docs pages show the other language's code straight away. Tooltips are built on hover, so they need nothing.</summary>
+        private static void RefreshDocs()
+        {
+            foreach (DocsWindow window in UnityEngine.Object.FindObjectsByType<DocsWindow>(FindObjectsSortMode.None))
+            {
+                try
+                {
+                    window.LoadDoc(window.openDoc);
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Log.LogWarning("Could not refresh a docs window after the language changed: " + ex);
+                }
             }
         }
 

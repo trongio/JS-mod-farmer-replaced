@@ -26,8 +26,13 @@
     <Reference Include="UnityEngine.UI"><HintPath>$(ManagedDir)/UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UIModule"><HintPath>$(ManagedDir)/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
+  <ItemGroup>
+    <JsFile Include="js/**" />
+    <None Include="@(JsFile)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(Deploy)' == 'true'">
     <Error Condition="!Exists('$(GameDir)/BepInEx')" Text="BepInEx is not installed in $(GameDir)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)/BepInEx/plugins/JsMod" />
+    <Copy SourceFiles="@(JsFile)" DestinationFiles="@(JsFile->'$(GameDir)/BepInEx/plugins/JsMod/js/%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>

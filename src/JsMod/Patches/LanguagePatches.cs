@@ -29,7 +29,14 @@ namespace JsMod.Patches
             {
                 return true;
             }
-            __result = JsParser.Parse(stream, f);
+            try
+            {
+                __result = JsParser.Parse(stream, f);
+            }
+            catch (ParseException ex)
+            {
+                throw new ParseException(JsErrors.Translate(ex.Message, Localizer.Lang), ex.startIndex, ex.endIndex);
+            }
             return false;
         }
     }

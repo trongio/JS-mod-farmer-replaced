@@ -1,8 +1,10 @@
 using System;
+using System.IO;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using JsMod.Lang;
 using JsMod.Patches;
 
 namespace JsMod
@@ -47,6 +49,17 @@ namespace JsMod
             PatchOptional(harmony, typeof(AutoIndentPatch));
             PatchOptional(harmony, typeof(WordListPatch));
             PatchLanguageOption(harmony);
+            JsContent.Warn = message => Log.LogWarning(message);
+            JsContent.Load(Path.Combine(Path.GetDirectoryName(Info.Location), "js"));
+            // Each of these is a no-op unless the setting is JavaScript, and on failure that text just stays Python.
+            PatchOptional(harmony, typeof(CodeTagsPatch));
+            PatchOptional(harmony, typeof(LoadDocPatch));
+            PatchOptional(harmony, typeof(CodeExamplePatch));
+            PatchOptional(harmony, typeof(NiceStringPatch));
+            PatchOptional(harmony, typeof(UnlockBoxPatch));
+            PatchOptional(harmony, typeof(ImportCompletionPatch));
+            PatchOptional(harmony, typeof(SignaturePatch));
+            PatchOptional(harmony, typeof(KeywordTooltipPatch));
             Log.LogInfo("JsMod loaded. Choose the programming language in Options > General, or start a file with // @js or # @py. Leaderboard submission is off.");
         }
 

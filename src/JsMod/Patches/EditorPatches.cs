@@ -15,6 +15,17 @@ namespace JsMod.Patches
             {
                 return true;
             }
+            if (inserted == "}")
+            {
+                string edited = input.text;
+                int caret = input.stringPosition;
+                if (Display.OutdentClosingBrace(ref edited, ref caret))
+                {
+                    input.text = edited;
+                    input.stringPosition = caret;
+                }
+                return false;
+            }
             if (!inserted.EndsWith("\n", System.StringComparison.Ordinal))
             {
                 return false;
@@ -36,25 +47,54 @@ namespace JsMod.Patches
         }
     }
 
-    /// <summary>Autocomplete in JS windows offers JS keywords and hides Python-only ones.</summary>
+    /// <summary>Autocomplete in JS windows offers the JS words for the keywords unlocked so far, and hides Python-only ones.</summary>
     [HarmonyPatch(typeof(CodeWindow), "GetWordList")]
     internal static class WordListPatch
     {
-        private static readonly string[] PythonOnly = { "def", "elif", "pass", "and", "or", "not", "True", "False", "None", "global", "import", "from" };
-
-        private static readonly string[] JsWords = { "let", "const", "function", "of", "true", "false", "null", "undefined", "return", "if", "else", "while", "for", "break", "continue" };
-
         private static void Postfix(CodeWindow __instance, ref List<string> __result)
         {
-            if (!LanguageMode.IsJs(__instance.CodeInput.text, __instance))
+            if (LanguageMode.IsJs(__instance.CodeInput.text, __instance))
             {
-                return;
+                __result = Display.JsWordList(__result);
             }
-            var words = new HashSet<string>(__result);
-            words.ExceptWith(PythonOnly);
-            words.UnionWith(JsWords);
-            __result = new List<string>(words);
-            __result.Sort();
+        }
+    }
+
+    /// <summary>Autocomplete offers file names in a JS import, where the Python rule looks for different words.</summary>
+    [HarmonyPatch(typeof(CodeWindow), "IsImportStatement")]
+    internal static class ImportCompletionPatch
+    {
+        private static void Postfix(CodeWindow __instance, string text, int stringIndex, ref bool __result)
+        {
+            if (LanguageMode.IsJs(text, __instance))
+            {
+                __result = Display.IsJsImportPosition(text, stringIndex);
+            }
+        }
+    }
+
+    /// <summary>A JS function's hover text includes the // comments above it.</summary>
+    [HarmonyPatch(typeof(FunctionNode), nameof(FunctionNode.GetSignature))]
+    internal static class SignaturePatch
+    {
+        private static void Postfix(FunctionNode __instance, ref string __result)
+        {
+            CodeWindow window = __instance.boxedParams.codeWindow;
+            string source = window.CodeInput.text;
+            if (LanguageMode.IsJs(source, window))
+            {
+                __result = Display.SignatureWithComments(source, __result, __instance.boxedParams.wordStart);
+            }
+        }
+    }
+
+    /// <summary>Hovering a JS keyword shows the tooltip of the Python keyword it replaces.</summary>
+    [HarmonyPatch(typeof(TooltipUtils), nameof(TooltipUtils.KeywordTooltip))]
+    internal static class KeywordTooltipPatch
+    {
+        private static void Prefix(ref string word)
+        {
+            word = Display.TooltipKeyword(word);
         }
     }
 }
