@@ -1,7 +1,7 @@
 ---
 id: JMFR-4
 title: "JS mode: show all code in the game as JavaScript"
-status: todo
+status: in-progress
 milestone: false
 size: XL
 area: mod
@@ -9,9 +9,9 @@ priority: 2
 blocked: ""
 depends: [JMFR-3]
 created: 2026-11-06
-started:
+started: 2026-11-06
 done:
-branch:
+branch: feat/js-everywhere
 links: []
 ---
 
