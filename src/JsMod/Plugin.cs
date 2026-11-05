@@ -69,6 +69,8 @@ namespace JsMod
             PatchOptional(harmony, typeof(EditorKeysPatch));
             PatchOptional(harmony, typeof(FormatOnRunPatch));
             PatchOptional(harmony, typeof(WindowButtonsPatch));
+            PatchOptional(harmony, typeof(RainbowIndentsPatch));
+            PatchOptional(harmony, typeof(DoubleShiftPatch));
             PatchOptional(harmony, typeof(ExampleCopyPatch));
             PatchOptional(harmony, typeof(ShortcutsDocPatch));
             OptionHolder.OnOptionChanged += EditorOptions.OnOptionChanged;

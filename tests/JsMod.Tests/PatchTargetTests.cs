@@ -68,6 +68,15 @@ public class PatchTargetTests
         Assert.NotNull(typeof(ColoredButton).GetField("holdDuration", Any));
         Assert.NotNull(typeof(ColoredButton).GetField("onHeld", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("executeButton", Any));
+        AssertTarget(typeof(InputBoss), "Update");
+        AssertTarget(typeof(SearchBox), "StartSearch");
+        AssertTarget(typeof(SearchBox), "CloseSearchBox");
+        AssertTarget(typeof(CodeWindow), "UpdateSearch");
+        Assert.NotNull(typeof(SearchBox).GetField("inputField", Any));
+        Assert.NotNull(typeof(Workspace).GetField("searchBox", Any));
+        Assert.NotNull(typeof(CodeWindow).GetField("searchWord", Any));
+        Assert.NotNull(typeof(CodeWindow).GetField("selectedSearchIndex", Any));
+        Assert.NotNull(typeof(KeyBindOptionUI).GetField("active", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("stepByStepButton", Any));
         Assert.NotNull(typeof(CodeWindow).GetField("fileNameText", Any));
         Assert.NotNull(typeof(BreakPointPanel).GetField("breakpointLines", Any));

@@ -60,6 +60,7 @@ namespace JsMod.Editor
         public const string MasterOption = "editor enhancements";
         public const string FormatOnRunOption = "editor format on run";
         public const string FormatOnSaveOption = "editor format on save";
+        public const string RainbowOption = "editor rainbow indents";
         public const string KeymapOption = "editor keymap";
         public const string KeymapGame = "Game";
         public const string KeymapPhpStorm = "PhpStorm";
@@ -148,6 +149,7 @@ namespace JsMod.Editor
                 string bound = stockKeys(option);
                 page.Append(string.IsNullOrEmpty(bound) ? unbound : "`" + bound + "`").Append(": ").Append(label(option)).Append('\n');
             }
+            page.Append("`Shift Shift`: ").Append(ModStrings.Lookup("editor search twice", language)).Append("\n");
             return page.ToString();
         }
     }

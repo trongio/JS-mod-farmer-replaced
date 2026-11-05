@@ -16,18 +16,25 @@ namespace JsMod.Editor.Game
         public float ExtraWidth;
         public RectTransform MovedName;
         public float NameShift;
+        public Image Icon;
     }
 
     /// <summary>
-    /// Buttons copied from the game's own, and labelled with text. Format follows run and step on the left. On the right,
+    /// Buttons copied from the game's own, with embedded icons, or text labels if those can't load. Format, undo and redo follow run and step on the left. On the right,
     /// positions come from the prefabs: header buttons sit 50 apart from the top right corner, and the two rightmost are the game's close and minimize.
     /// </summary>
     internal static class EditorButtons
     {
-        private const float WidthForHeaderButtons = 190f;
+        private const float WidthWithIcons = 150f;
+        private const float WidthWithLabels = 190f;
+        private const float HeaderIconSize = 21f;
+        private const float SearchIconSize = 30f;
+        private static bool warnedNoSearch;
 
         internal static void AddToWindow(CodeWindow window)
         {
+            ModStrings.KeysFor = option => OptionHolder.GetKeyCombination(option).ToString().Trim();
+            AddSearchButton();
             if (window.GetComponentInChildren<EditorButtonTag>(true) != null)
             {
                 return;
@@ -38,27 +45,29 @@ namespace JsMod.Editor.Game
                 throw new InvalidOperationException("The code window has no MinimizeButton to copy.");
             }
             float leftWidth = AddLeftButtons(window, source);
-            AddButton(source, window.transform, "?", "editor button help", new Vector2(-116f, source.GetComponent<RectTransform>().anchoredPosition.y), 35f, () => window.workspace.AddNewDocsWindow(EditorBindings.ShortcutsDoc));
+            float y = source.GetComponent<RectTransform>().anchoredPosition.y;
+            bool icons = EditorIcons.Available;
+            AddButton(source, window.transform, "?", "editor button help", new Vector2(-116f, y), 35f, () => window.workspace.AddNewDocsWindow(EditorBindings.ShortcutsDoc), IconNames.Help, HeaderIconSize);
             ColoredButton copy = null;
-            copy = AddButton(source, window.transform, Localizer.Localize("editor copy label"), "editor button copy", new Vector2(-176f, source.GetComponent<RectTransform>().anchoredPosition.y), 65f, () => Copy(window, copy));
+            copy = AddButton(source, window.transform, Localizer.Localize("editor copy label"), "editor button copy", new Vector2(icons ? -166f : -176f, y), icons ? 35f : 65f, () => Copy(window, copy), IconNames.Copy, HeaderIconSize);
             var tag = copy.GetComponent<EditorButtonTag>();
+            float extra = (icons ? WidthWithIcons : WidthWithLabels) + leftWidth;
             var minWidth = Traverse.Create(window).Field("minWidth");
-            minWidth.SetValue(minWidth.GetValue<float>() + WidthForHeaderButtons + leftWidth);
+            minWidth.SetValue(minWidth.GetValue<float>() + extra);
             tag.Widened = window;
-            tag.ExtraWidth = WidthForHeaderButtons + leftWidth;
+            tag.ExtraWidth = extra;
         }
 
         /// <summary>Format, undo and redo follow the run and step buttons at the same spacing, and the file name moves over to make room. Returns the extra width past format.</summary>
         private static float AddLeftButtons(CodeWindow window, Transform source)
         {
-            ModStrings.KeysFor = option => OptionHolder.GetKeyCombination(option).ToString().Trim();
             var traverse = Traverse.Create(window);
             var run = (RectTransform)traverse.Field("executeButton").GetValue<ColoredButton>().transform;
             var step = (RectTransform)traverse.Field("stepByStepButton").GetValue<ColoredButton>().transform;
             float gap = step.anchoredPosition.x - run.anchoredPosition.x;
-            ColoredButton format = AddBesideStep(source, window, step, gap, "{ }", "editor button format", () => EditorActions.Format(window, false));
-            AddBesideStep(source, window, step, gap * 2f, Localizer.Localize("editor undo label"), "editor button undo", () => EditorActions.UndoOrRedo(window, true));
-            AddBesideStep(source, window, step, gap * 3f, Localizer.Localize("editor redo label"), "editor button redo", () => EditorActions.UndoOrRedo(window, false));
+            ColoredButton format = AddBesideStep(source, window, step, gap, "{ }", "editor button format", () => EditorActions.Format(window, false), IconNames.Format);
+            AddBesideStep(source, window, step, gap * 2f, Localizer.Localize("editor undo label"), "editor button undo", () => EditorActions.UndoOrRedo(window, true), IconNames.Undo);
+            AddBesideStep(source, window, step, gap * 3f, Localizer.Localize("editor redo label"), "editor button redo", () => EditorActions.UndoOrRedo(window, false), IconNames.Redo);
             var name = (RectTransform)traverse.Field("fileNameText").GetValue<TMP_InputField>().transform;
             name.offsetMin += new Vector2(gap * 3f, 0f);
             var tag = format.GetComponent<EditorButtonTag>();
@@ -67,9 +76,9 @@ namespace JsMod.Editor.Game
             return gap * 2f;
         }
 
-        private static ColoredButton AddBesideStep(Transform source, CodeWindow window, RectTransform step, float offset, string label, string tooltip, Action clicked)
+        private static ColoredButton AddBesideStep(Transform source, CodeWindow window, RectTransform step, float offset, string label, string tooltip, Action clicked, string icon)
         {
-            ColoredButton button = AddButton(source, window.transform, label, tooltip, Vector2.zero, step.sizeDelta.x, clicked);
+            ColoredButton button = AddButton(source, window.transform, label, tooltip, Vector2.zero, step.sizeDelta.x, clicked, icon, HeaderIconSize);
             var rect = (RectTransform)button.transform;
             rect.anchorMin = step.anchorMin;
             rect.anchorMax = step.anchorMax;
@@ -85,19 +94,62 @@ namespace JsMod.Editor.Game
             {
                 return;
             }
+            float width = EditorIcons.Available ? 34f : 70f;
             ColoredButton copy = null;
-            copy = AddButton(executeButton.transform, codeWindow.transform, Localizer.Localize("editor copy label"), "editor button copy", new Vector2(-8f, -6f), 70f, () => Copy(codeWindow, copy));
+            copy = AddButton(executeButton.transform, codeWindow.transform, Localizer.Localize("editor copy label"), "editor button copy", new Vector2(-8f, -6f), width, () => Copy(codeWindow, copy), IconNames.Copy, 20f);
             var rect = (RectTransform)copy.transform;
             rect.anchorMin = Vector2.one;
             rect.anchorMax = Vector2.one;
             rect.pivot = Vector2.one;
-            rect.sizeDelta = new Vector2(70f, 34f);
+            rect.sizeDelta = new Vector2(width, 34f);
             rect.anchoredPosition = new Vector2(-8f, -6f);
             LayoutElement layout = copy.GetComponent<LayoutElement>() ?? copy.gameObject.AddComponent<LayoutElement>();
             layout.ignoreLayout = true;
         }
 
-        private static ColoredButton AddButton(Transform source, Transform parent, string label, string tooltip, Vector2 position, float width, Action clicked)
+        /// <summary>Beside the game's new file, info and tech tree buttons, at their spacing. Without an icon there's no button.</summary>
+        private static void AddSearchButton()
+        {
+            try
+            {
+                if (!EditorIcons.Available)
+                {
+                    return;
+                }
+                GameObject addFile = null;
+                foreach (ColoredButton candidate in UnityEngine.Object.FindObjectsByType<ColoredButton>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    if (candidate.name == "AddFileButton")
+                    {
+                        addFile = candidate.gameObject;
+                        break;
+                    }
+                }
+                if (addFile == null)
+                {
+                    throw new InvalidOperationException("The game has no AddFileButton to copy.");
+                }
+                Transform group = addFile.transform.parent;
+                if (group.GetComponentInChildren<EditorButtonTag>(true) != null)
+                {
+                    return;
+                }
+                var add = (RectTransform)addFile.transform;
+                var info = group.Find("InfoButton") as RectTransform;
+                float gap = info != null ? info.anchoredPosition.x - add.anchoredPosition.x : 77f;
+                AddButton(add, group, "", "editor button search", add.anchoredPosition - new Vector2(gap, 0f), add.sizeDelta.x, EditorActions.ToggleSearch, IconNames.Search, SearchIconSize);
+            }
+            catch (Exception ex)
+            {
+                if (!warnedNoSearch)
+                {
+                    warnedNoSearch = true;
+                    Plugin.Log.LogWarning("Could not add the search button: " + ex.Message);
+                }
+            }
+        }
+
+        private static ColoredButton AddButton(Transform source, Transform parent, string label, string tooltip, Vector2 position, float width, Action clicked, string iconName, float iconSize)
         {
             GameObject clone = UnityEngine.Object.Instantiate(source.gameObject, parent);
             clone.name = "JsModEditorButton";
@@ -113,12 +165,31 @@ namespace JsMod.Editor.Game
             Traverse.Create(colored).Field("holdDuration").SetValue(0f);
             colored.SetTooltipDescription(tooltip);
             Transform icon = clone.transform.Find("Image");
-            if (icon != null)
+            Sprite sprite = EditorIcons.Get(iconName);
+            Image image = icon != null ? icon.GetComponent<Image>() : null;
+            if (sprite != null && image != null)
+            {
+                image.sprite = sprite;
+                image.type = Image.Type.Simple;
+                image.preserveAspect = true;
+                var iconRect = image.rectTransform;
+                iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                iconRect.anchoredPosition = Vector2.zero;
+                iconRect.sizeDelta = new Vector2(iconSize, iconSize);
+                icon.gameObject.SetActive(true);
+                clone.GetComponent<EditorButtonTag>().Icon = image;
+            }
+            else if (icon != null)
             {
                 icon.gameObject.SetActive(false);
             }
             TextMeshProUGUI text = clone.GetComponentInChildren<TextMeshProUGUI>(true);
-            if (text != null)
+            if (text != null && clone.GetComponent<EditorButtonTag>().Icon != null)
+            {
+                text.gameObject.SetActive(false);
+            }
+            else if (text != null)
             {
                 // It would otherwise treat our text as a language key and replace it.
                 TMPTextLocalizer localizer = text.GetComponent<TMPTextLocalizer>();
@@ -151,8 +222,16 @@ namespace JsMod.Editor.Game
             {
                 // The input holds plain source. Colours live in a separate text mesh, and a docs example's setup was split off before it got here.
                 GUIUtility.systemCopyBuffer = window.CodeInput.text;
-                button.Text = Localizer.Localize("editor copied label");
-                button.StartCoroutine(RestoreLabel(button));
+                Image icon = button.GetComponent<EditorButtonTag>().Icon;
+                if (icon != null)
+                {
+                    icon.sprite = EditorIcons.Get(IconNames.Copied);
+                }
+                else
+                {
+                    button.Text = Localizer.Localize("editor copied label");
+                }
+                button.StartCoroutine(RestoreLabel(button, icon));
             }
             catch (Exception ex)
             {
@@ -160,10 +239,14 @@ namespace JsMod.Editor.Game
             }
         }
 
-        private static IEnumerator RestoreLabel(ColoredButton button)
+        private static IEnumerator RestoreLabel(ColoredButton button, Image icon)
         {
             yield return new WaitForSecondsRealtime(1f);
-            if (button != null)
+            if (icon != null)
+            {
+                icon.sprite = EditorIcons.Get(IconNames.Copy);
+            }
+            else if (button != null)
             {
                 button.Text = Localizer.Localize("editor copy label");
             }

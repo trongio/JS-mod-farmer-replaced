@@ -35,6 +35,12 @@ namespace JsMod.Lang
                 "Formats the file you're editing when you press the save key. Autosave doesn't format.",
                 "რედაქტირებად ფაილს აფორმატებს შენახვის კლავიშზე დაჭერისას. ავტომატური შენახვა არ აფორმატებს."
             },
+            ["editor rainbow indents"] = new[] { "Rainbow indents", "ფერადი შეწევები" },
+            ["editor rainbow indents tooltip"] = new[]
+            {
+                "Colours each level of indentation, so you can see where blocks start and end.",
+                "შეწევის თითოეულ დონეს სხვა ფერით აჩვენებს, რომ ადვილად ნახო, სად იწყება და სად მთავრდება ბლოკი."
+            },
             ["editor keymap"] = new[] { "Shortcut preset", "მალსახმობების ნაკრები" },
             ["editor keymap tooltip"] = new[]
             {
@@ -58,6 +64,8 @@ namespace JsMod.Lang
             ["editor button copy"] = new[] { "Copy this code.", "დააკოპირე ეს კოდი." },
             ["editor button undo"] = new[] { "Undo", "გაუქმება" },
             ["editor button redo"] = new[] { "Redo", "გამეორება" },
+            ["editor button search"] = new[] { "Search", "ძებნა" },
+            ["editor search twice"] = new[] { "Search (press Shift twice)", "ძებნა (ორჯერ დააჭირე Shift-ს)" },
             ["editor undo label"] = new[] { "Undo", "უკან" },
             ["editor redo label"] = new[] { "Redo", "წინ" },
             ["editor button help"] = new[] { "Editor shortcuts.", "რედაქტორის მალსახმობები." },
@@ -81,7 +89,8 @@ namespace JsMod.Lang
         private static readonly Dictionary<string, string[]> KeyedTooltips = new Dictionary<string, string[]>
         {
             ["editor button undo"] = new[] { "undo" },
-            ["editor button redo"] = new[] { "redo 1", "redo 2" }
+            ["editor button redo"] = new[] { "redo 1", "redo 2" },
+            ["editor button search"] = new[] { "search", "=Shift Shift" }
         };
 
         /// <summary>The keys bound to a game option, or empty when none. Set once the game's options are available.</summary>
@@ -97,7 +106,7 @@ namespace JsMod.Lang
             string value = language == "KA" ? text[1] : text[0];
             if (KeysFor != null && KeyedTooltips.TryGetValue(key, out string[] options))
             {
-                string keys = string.Join(" / ", options.Select(KeysFor).Where(k => !string.IsNullOrEmpty(k)));
+                string keys = string.Join(" / ", options.Select(o => o.StartsWith("=") ? o.Substring(1) : KeysFor(o)).Where(k => !string.IsNullOrEmpty(k)));
                 return keys.Length == 0 ? value : value + " (" + keys + ")";
             }
             return value;

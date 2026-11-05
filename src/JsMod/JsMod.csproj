@@ -25,11 +25,13 @@
     <Reference Include="Unity.TextMeshPro"><HintPath>$(ManagedDir)/Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UI"><HintPath>$(ManagedDir)/UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.IMGUIModule"><HintPath>$(ManagedDir)/UnityEngine.IMGUIModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.InputLegacyModule"><HintPath>$(ManagedDir)/UnityEngine.InputLegacyModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UIModule"><HintPath>$(ManagedDir)/UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
     <JsFile Include="js/**" />
     <None Include="@(JsFile)" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="icons/*.png" LogicalName="icons/%(Filename)%(Extension)" />
   </ItemGroup>
   <Target Name="DeployToGame" AfterTargets="Build" Condition="'$(Deploy)' == 'true'">
     <Error Condition="!Exists('$(GameDir)/BepInEx')" Text="BepInEx is not installed in $(GameDir)" />

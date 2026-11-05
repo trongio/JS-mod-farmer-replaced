@@ -71,7 +71,7 @@ namespace JsMod.Editor.Game
     {
         private static void Prefix(MainSim __instance, CodeWindow cw, ref Node syntaxTree)
         {
-            if (!EditorOptions.IsOn(EditorBindings.FormatOnRunOption) || __instance.IsExecuting())
+            if (!EditorOptions.FormatOnRunOn || __instance.IsExecuting())
             {
                 return;
             }
@@ -81,6 +81,84 @@ namespace JsMod.Editor.Game
             {
                 syntaxTree = cw.Parse() ?? syntaxTree;
             }
+        }
+    }
+
+    /// <summary>Only for a player's own windows, while they colour their code. Docs examples and tooltips stay as they are.</summary>
+    [HarmonyPatch(typeof(CodeUtilities), nameof(CodeUtilities.SyntaxColor2))]
+    internal static class RainbowIndentsPatch
+    {
+        private static bool warned;
+
+        private static void Postfix(string code, ref string __result)
+        {
+            try
+            {
+                CodeWindow window = LanguageMode.ColouringWindow;
+                if ((object)window != null && !window.CodeInput.readOnly && LanguageMode.IsPlayerWindow(window) && EditorOptions.RainbowIndentsOn)
+                {
+                    __result = RainbowIndents.Apply(__result, code);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (!warned)
+                {
+                    warned = true;
+                    Plugin.Log.LogWarning("Rainbow indents failed: " + ex.Message);
+                }
+            }
+        }
+    }
+
+    /// <summary>The game polls keys here every frame, whatever has the focus, so this sees Shift in the editor too.</summary>
+    [HarmonyPatch(typeof(InputBoss), "Update")]
+    internal static class DoubleShiftPatch
+    {
+        private static readonly DoubleShift Detector = new DoubleShift();
+
+        private static void Postfix()
+        {
+            try
+            {
+                if (!EditorOptions.Enabled)
+                {
+                    Detector.Reset();
+                    return;
+                }
+                bool pressed = Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift);
+                bool released = Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift);
+                // anyKeyDown also covers mouse buttons.
+                bool other = Input.anyKeyDown && !pressed;
+                bool modifier = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+                if (Detector.Feed(Time.unscaledTime, pressed, released, other, modifier) && SearchAllowed())
+                {
+                    EditorActions.OpenOrFocusSearch();
+                }
+            }
+            catch (Exception ex)
+            {
+                Detector.Reset();
+                Plugin.Log.LogWarning("Double Shift failed: " + ex.Message);
+            }
+        }
+
+        private static bool SearchAllowed()
+        {
+            MainSim sim = MainSim.Inst;
+            if (sim == null || sim.workspace == null || sim.menu.gameObject.activeInHierarchy || sim.researchMenu.IsOpen || sim.leaderboardManager.IsLeaderBoardScreenOpen)
+            {
+                return false;
+            }
+            // A rebinding row is waiting for keys, and Shift is part of what it records.
+            foreach (KeyBindOptionUI row in UnityEngine.Object.FindObjectsByType<KeyBindOptionUI>(FindObjectsSortMode.None))
+            {
+                if (Traverse.Create(row).Field("active").GetValue<bool>())
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 

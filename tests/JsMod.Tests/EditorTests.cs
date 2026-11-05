@@ -602,7 +602,7 @@ public class EditorTests
         {
             EditorBindings.MasterOption, EditorBindings.FormatOnRunOption, EditorBindings.FormatOnSaveOption, EditorBindings.KeymapOption,
             EditorBindings.MasterOption + " tooltip", EditorBindings.FormatOnRunOption + " tooltip", EditorBindings.FormatOnSaveOption + " tooltip", EditorBindings.KeymapOption + " tooltip",
-            "editor shortcut tooltip", "editor button undo", "editor button redo", "editor undo label", "editor redo label", "editor button format", "editor button copy", "editor button help", "editor copy label", "editor copied label", "editor format unsafe",
+            EditorBindings.RainbowOption, EditorBindings.RainbowOption + " tooltip", "editor button search", "editor search twice", "editor shortcut tooltip", "editor button undo", "editor button redo", "editor undo label", "editor redo label", "editor button format", "editor button copy", "editor button help", "editor copy label", "editor copied label", "editor format unsafe",
             "editor shortcuts title", "editor shortcuts intro", "editor shortcut unbound"
         }))
         {

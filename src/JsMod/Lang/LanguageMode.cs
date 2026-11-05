@@ -39,6 +39,9 @@ namespace JsMod.Lang
             return !JsMarker.IsPy(code) && (IsPlayerWindow(window) || IsJsExample(window)) && SettingIsJs;
         }
 
+        /// <summary>The window colouring its own code on this thread, or null for code anywhere else.</summary>
+        public static CodeWindow ColouringWindow => colouring;
+
         public static bool IsJsWhileTokenizing(string code)
         {
             return IsJs(code, tokenizing);

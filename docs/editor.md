@@ -16,7 +16,7 @@ Your code is left alone unless all of these hold:
 
 Formatting is one undo step. If the window has breakpoints, blank lines stay so that breakpoints keep their lines. Indentation follows the game's Tabs to Spaces option.
 
-**Format on run** and **Format on save** are options, both off by default. Format on run covers the run buttons, the run key and `Ctrl Enter`. Format on save applies to the save key, not autosave, and the game may write the file before formatting finishes, so the formatted text can reach the disk on the next save.
+**Format on run** is on by default, and **Format on save** is off. Code that can't be formatted runs as it is. Format on run covers the run buttons, the run key and `Ctrl Enter`. Format on save applies to the save key, not autosave, and the game may write the file before formatting finishes, so the formatted text can reach the disk on the next save.
 
 ## Shortcuts
 
@@ -26,6 +26,7 @@ Modelled on PhpStorm's default keymap, and changeable in Options > Controls. The
 |---|---|
 | `Ctrl Enter` | Run the code (does nothing while it's already running) |
 | `Tab` / `Shift Tab` | Indent or unindent lines (the game's own keys) |
+| `Shift Shift` | Search |
 | `Ctrl Alt L` | Format code |
 | `Ctrl D` | Duplicate line or selection |
 | not set | Delete line (`Ctrl Y` is the game's second redo key) |
@@ -53,7 +54,13 @@ The game checks its own keys, such as run and save, separately from the editor. 
 
 ## Buttons
 
-Code windows get `{ }` (format), `Undo` and `Redo` beside the run and step buttons, plus `?` (shortcuts) and `Copy` beside minimize. Docs examples get `Copy`, which copies the code shown, in the current language, without any setup code.
+Code windows get format, undo and redo icons beside the run and step buttons, plus shortcuts help and copy beside minimize. If the icons can't load, they fall back to text labels. The undo and redo buttons work whenever the game's keys do, so like the keys they stop a running program when they change its text. Docs examples get `Copy`, which copies the code shown, in the current language, without any setup code.
+
+A search icon joins the game's new file, info and tech tree buttons at the top right. It and `Shift Shift` (Shift pressed twice within 300 ms, as in PhpStorm) open the game's search. The button closes it if it's open, while `Shift Shift` moves to it. The game's search looks only through windows that are open, code and docs alike, and takes up to 29 characters. It doesn't search docs pages you haven't opened.
+
+## Rainbow indents
+
+Each level of a line's indentation gets its own soft colour, which helps most in Python, where indentation is the structure. A tab is one level, and spaces go by the file's indent size, four unless the file works in twos. Spaces that don't fill a level, lines with nothing else on them, and the inside of multi-line comments and strings stay plain. It's the **Rainbow indents** option, on by default, and it applies to your own code windows only.
 
 ## Not included
 

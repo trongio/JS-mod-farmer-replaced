@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Reflection;
 using HarmonyLib;
 using JsMod.Lang;
@@ -84,28 +85,138 @@ namespace JsMod.Editor.Game
         }
 
         /// <summary>What the game's undo and redo keys call, for this window. Those act on the active window, so it becomes active first.</summary>
+        /// <summary>What the search button does: opens the game's search, or closes it if it's open.</summary>
+        internal static void ToggleSearch()
+        {
+            try
+            {
+                SearchBox box = MainSim.Inst.workspace.searchBox;
+                if (box.gameObject.activeInHierarchy)
+                {
+                    box.CloseSearchBox();
+                }
+                else
+                {
+                    StartSearch(box);
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning("Search failed: " + ex.Message);
+            }
+        }
+
+        /// <summary>What pressing Shift twice does: it opens the search, and only moves to it if it's already open.</summary>
+        internal static void OpenOrFocusSearch()
+        {
+            try
+            {
+                SearchBox box = MainSim.Inst.workspace.searchBox;
+                if (box.gameObject.activeInHierarchy)
+                {
+                    Traverse.Create(box).Field("inputField").GetValue<CodeInputField>().Select();
+                }
+                else
+                {
+                    StartSearch(box);
+                }
+            }
+            catch (Exception ex)
+            {
+                Plugin.Log.LogWarning("Search failed: " + ex.Message);
+            }
+        }
+
+        /// <summary>Like the game's search key, it starts with the selected text. A button click takes the focus first, so the active window is the fallback.</summary>
+        private static void StartSearch(SearchBox box)
+        {
+            GameObject selected = EventSystem.current?.currentSelectedGameObject;
+            CodeInputField input = selected != null ? selected.GetComponent<CodeInputField>() : null;
+            if (input == null)
+            {
+                Window active = MainSim.Inst.workspace.activeWindow;
+                CodeWindow window = active != null ? active.GetComponent<CodeWindow>() : null;
+                input = window != null ? window.CodeInput : null;
+            }
+            if (input != null && input.selectionStringAnchorPosition != input.selectionStringFocusPosition)
+            {
+                int start = Mathf.Min(input.selectionStringAnchorPosition, input.selectionStringFocusPosition);
+                int end = Mathf.Max(input.selectionStringAnchorPosition, input.selectionStringFocusPosition);
+                box.StartSearch(input.text.Substring(start, end - start));
+            }
+            else
+            {
+                box.StartSearch();
+            }
+        }
+
+        /// <summary>Redraws code windows after a colouring option changes. It doesn't touch the code, so the save isn't marked as changed.</summary>
+        internal static void RecolourWindows()
+        {
+            MainSim sim = MainSim.Inst;
+            if (sim == null || sim.workspace == null)
+            {
+                return;
+            }
+            foreach (CodeWindow window in sim.workspace.codeWindows.Values)
+            {
+                try
+                {
+                    var traverse = Traverse.Create(window);
+                    window.UpdateSearch(traverse.Field("searchWord").GetValue<string>(), traverse.Field("selectedSearchIndex").GetValue<int>());
+                }
+                catch (Exception ex)
+                {
+                    Plugin.Log.LogWarning("Could not recolour " + window.fileName + ": " + ex.Message);
+                }
+            }
+        }
+
         internal static void UndoOrRedo(CodeWindow window, bool undo)
         {
             try
             {
-                if (!CanEdit(window))
+                CodeInputField input = window.CodeInput;
+                Plugin.Log.LogDebug((undo ? "Undo" : "Redo") + " button clicked on " + window.fileName + ", running: " + window.isExecuting + ", read only: " + input.readOnly);
+                // The game's own keys work while a program runs, and changing the text stops it, so only read-only windows refuse.
+                if (input.readOnly)
                 {
                     return;
                 }
+                bool wasRunning = window.isExecuting;
                 window.workspace.activeWindow = window.GetComponent<Window>();
-                if (undo)
+                bool changed = UndoSteps.StepUntilChanged(() => input.text, () =>
                 {
-                    window.workspace.Undo();
-                }
-                else
+                    if (undo)
+                    {
+                        window.workspace.Undo();
+                    }
+                    else
+                    {
+                        window.workspace.Redo();
+                    }
+                });
+                Plugin.Log.LogDebug((undo ? "Undo" : "Redo") + (changed ? " changed the text." : " had nothing to do."));
+                if (!wasRunning)
                 {
-                    window.workspace.Redo();
+                    window.StartCoroutine(Refocus(input));
                 }
             }
             catch (Exception ex)
             {
                 Plugin.Log.LogWarning((undo ? "Undo" : "Redo") + " failed: " + ex.Message);
             }
+        }
+
+        /// <summary>The click took the focus. Getting it back would normally select everything, so that's off until the field has activated.</summary>
+        private static IEnumerator Refocus(CodeInputField input)
+        {
+            bool selectAll = input.onFocusSelectAll;
+            input.onFocusSelectAll = false;
+            input.Select();
+            yield return null;
+            yield return null;
+            input.onFocusSelectAll = selectAll;
         }
 
         /// <summary>Silent is for format on run and on save: bad code just stays as it is, and the run reports its own errors.</summary>

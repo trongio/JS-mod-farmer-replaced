@@ -14,6 +14,10 @@ namespace JsMod.Editor.Game
 
         public static bool Enabled => OptionHolder.GetString(EditorBindings.MasterOption, "enabled") != "disabled";
 
+        public static bool FormatOnRunOn => Enabled && OptionHolder.GetString(EditorBindings.FormatOnRunOption, "enabled") != "disabled";
+
+        public static bool RainbowIndentsOn => Enabled && OptionHolder.GetString(EditorBindings.RainbowOption, "enabled") != "disabled";
+
         public static bool IsOn(string option)
         {
             return Enabled && OptionHolder.GetString(option, "disabled") == "enabled";
@@ -63,8 +67,9 @@ namespace JsMod.Editor.Game
             OptionSO dropdown = Template<DropdownOptionSO>(options, "language");
             OptionSO keyBind = Template<KeyBindOptionSO>(options, "autocomplete");
             Rows.Add(Copy(toggle, EditorBindings.MasterOption, "enabled", EditorBindings.MasterOption + " tooltip"));
-            Rows.Add(Copy(toggle, EditorBindings.FormatOnRunOption, "disabled", EditorBindings.FormatOnRunOption + " tooltip"));
+            Rows.Add(Copy(toggle, EditorBindings.FormatOnRunOption, "enabled", EditorBindings.FormatOnRunOption + " tooltip"));
             Rows.Add(Copy(toggle, EditorBindings.FormatOnSaveOption, "disabled", EditorBindings.FormatOnSaveOption + " tooltip"));
+            Rows.Add(Copy(toggle, EditorBindings.RainbowOption, "enabled", EditorBindings.RainbowOption + " tooltip"));
             var keymap = (DropdownOptionSO)Copy(dropdown, EditorBindings.KeymapOption, EditorBindings.KeymapGame, EditorBindings.KeymapOption + " tooltip");
             keymap.options = new List<string> { EditorBindings.KeymapGame, EditorBindings.KeymapPhpStorm };
             Rows.Add(keymap);
@@ -129,6 +134,11 @@ namespace JsMod.Editor.Game
             else if (item == EditorBindings.MasterOption)
             {
                 EditorButtons.Refresh();
+                EditorActions.RecolourWindows();
+            }
+            else if (item == EditorBindings.RainbowOption)
+            {
+                EditorActions.RecolourWindows();
             }
         }
     }

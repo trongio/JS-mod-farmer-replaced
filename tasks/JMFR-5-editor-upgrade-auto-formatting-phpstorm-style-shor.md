@@ -26,6 +26,11 @@ Upgrade the in-game code editor: auto formatting for JavaScript and Python, more
 - [ ] PhpStorm-style shortcuts work, are rebindable, and are listed in the game
 - [ ] New buttons fit the window header, with tooltips in English and Georgian
 - [ ] Copy buttons on docs code examples and code blocks, and on the code window, copy exactly the code shown in the current language
+- [ ] Header buttons show icons in the game's style, with text labels as the fallback
+- [ ] Rainbow indents colour each indentation level in Python and JS, with an option to turn them off
+- [ ] A search button and `Shift Shift` open the game's search
+- [ ] Undo and redo buttons work whenever the game's keys do
+- [ ] Format on run is on by default, and code that can't be formatted runs as it is
 - [ ] With the mod's editor features off, the editor behaves as stock
 
 ## Notes
