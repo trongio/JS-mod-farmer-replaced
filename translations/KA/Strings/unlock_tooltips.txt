@@ -1,0 +1,226 @@
+@unlock_tooltip_template_cost = ### განბლოკვის ფასი {{{{itemblock cost unlock {0}}}}}
+@unlock_tooltip_template_additional_requirement = ### განბლოკვის მოთხოვნები
+განბლოკვა {0} მინიმუმ {1} დონეზე უნდა იყოს.
+@unlock_descr_trees = განბლოკავს ხეებს.
+
+`plant(Entities.Trees)`
+@unlock_descr_speed = ზრდის დრონისა და კოდის შესრულების სიჩქარეს.
+@unlock_descr_plant = განბლოკავს დარგვას.
+
+`plant(Entities.Bush)`
+@unlock_descr_loops = განბლოკავს მარტივ while ციკლს.
+
+`while True:
+    harvest()`
+@unlock_descr_hats = ქუდები შენი დრონისთვის.
+
+`change_hat(Hats.Green_Hat)`
+@unlock_descr_the_farmers_remains = ?????????
+@unlock_descr_top_hat = ძალიან მოხდენილი ქუდი, რომელსაც მხოლოდ საუკეთესო დრონები ატარებენ.
+@unlock_descr_senses = დრონი ხედავს, რა არის მის ქვეშ და სად იმყოფება.
+
+`if get_pos_x() < 5 and num_items(Items.Wood) < 200:
+    plant(Entities.Bush)`
+@unlock_descr_expand = აფართოებს ფერმას და განბლოკავს მოძრაობას.
+@unlock_descr_operators = არითმეტიკული, შედარებისა და ლოგიკური ოპერატორები.
+
+`if not can_harvest() and (1 + 1 == 4 / 2):
+    do_a_flip()`
+@unlock_descr_pumpkin = გოგრები!
+
+`plant(Entities.Pumpkin)`
+@unlock_descr_variables = მიანიჭე მნიშვნელობები ცვლადებს.
+
+`next_plant = Entities.Bush
+plant(next_plant)`
+@unlock_descr_functions = განსაზღვრე საკუთარი ფუნქციები.
+
+`def do_two_flips():
+    do_a_flip()
+    do_a_flip()
+
+do_two_flips()`
+@unlock_descr_watering = მორწყე მცენარეები, რომ უფრო სწრაფად გაიზარდონ.
+
+`use_item(Items.Water)`
+@unlock_descr_carrots = გადახენი ნიადაგი და დარგე სტაფილო.
+
+`till()
+plant(Entities.Carrot)`
+@unlock_descr_rice = ხორბალს ჰგავს, ხორბალი თიხაზე რომ იზრდებოდეს.
+
+`if get_ground_type() == Grounds.Clay:
+    plant(Entities.Rice)`
+@unlock_descr_lists = გამოიყენე სიები ბევრი მნიშვნელობის შესანახად.
+
+`plants = [Entities.Grass, Entities.Bush, Entities.Tree]
+
+for p in plants:
+    plant(p)
+    move(North)`
+@unlock_descr_costs = იძლევა ნივთების ფასებზე წვდომას.
+
+`cost = get_cost(Entities.Carrot)
+for item in cost:
+	amount_needed = cost[item]`
+@unlock_descr_fertilizer = მცენარეების მყისიერი გაზრდა.
+
+`use_item(Items.Fertilizer)`
+@unlock_descr_mazes = ლაბირინთი, რომლის შუაშიც განძია.
+
+`if get_entity_type() == Entities.Treasure:
+    harvest()`
+@unlock_descr_debug = პროგრამების გამართვის ხელსაწყოები.
+
+`print("hi")`
+@unlock_descr_debug2 = ფუნქციები შესრულების დროებით შესანელებლად და ფერმის დასაპატარავებლად.
+
+`set_world_size(3)
+set_execution_speed(1)`
+@unlock_descr_grass = ზრდის ბალახის მოსავლიანობას.
+@unlock_descr_auto_unlock = ავტომატური განბლოკვა.
+
+`unlock(Unlocks.Megafarm)`
+@unlock_descr_polyculture = გამოიყენე თანამდგომი მცენარეები მოსავლიანობის გასაზრდელად.
+
+`plant_type, (x, y) = get_companion()`
+@unlock_descr_sunflowers = მზესუმზირები და ენერგია.
+
+`plant(Entities.Sunflowers)`
+@unlock_descr_leaderboard = შეეჯიბრე საუკეთესო დროებს რეიტინგში.
+
+`leaderboard_run(Leaderboards.Hay, "hay_file", speedup)`
+@unlock_descr_underground_leaderboard = შეეჯიბრე საუკეთესო დროებს მიწისქვეშა რეიტინგში.
+
+`leaderboard_run(Leaderboards.Rice, "rice_file", speedup)`
+@unlock_descr_dicts = იძლევა ლექსიკონებსა და სიმრავლეებზე წვდომას.
+
+`right_of = {North:East, East:South, South:West, West:North}`
+@unlock_descr_utilities = განბლოკავს `min()`, `max()`, `abs()` და `random()` ფუნქციებს.
+
+`random_index = random() * len(list) // 1`
+@unlock_descr_cactus = კაქტუსი!
+
+`plant(Entities.Cactus)`
+@unlock_descr_dinosaurs = დიდებული უძველესი არსებები.
+@unlock_descr_simulation = გატესტე უფრო სწრაფად და განმეორებად პირობებში.
+
+`run_time = simulate(filename, sim_unlocks, sim_items, sim_globals, seed, speedup)`
+@unlock_descr_timing = დროა!
+
+`passed_time = get_time()`
+@unlock_descr_import = მოახდინე იმპორტი სხვა ფაილებიდან.
+
+`import other_file
+other_file.function()`
+@unlock_descr_megafarm = მეტი დრონი!
+
+`spawn_drone(task)`
+@unlock_descr_mining = დრონს აძლევს ბურღს. და სამთო ჩაფხუტს.
+
+`dig()`
+@unlock_descr_coal = მიწისქვეშ ჩნდება ქვანახშირის საბადოები.
+@unlock_descr_iron = მიწისქვეშ ჩნდება რკინის მადნის ძარღვები.
+@unlock_descr_pyramid = მიწისქვეშ ჩნდება უძველესი ქვიშაქვის ნაგებობები.
+@unlock_descr_quartz = მიწისქვეშ ჩნდება კვარცის ნემსები.
+@unlock_descr_ore_boost = აორმაგებს ქვანახშირის მოსავლიანობას. აორმაგებს რკინისა და კვარცის ძარღვების ზომას.
+@unlock_descr_jump = დრონს ქვემოთ გადახტომის საშუალებას აძლევს.
+@unlock_descr_prospecting = გამოიყენე ქვანახშირი რკინის საპოვნელად!
+
+`prospect_iron()`
+@unlock_descr_drill = აუმჯობესებს ბურღის სიმძლავრეს.
+@unlock_descr_debug_place = განათავსე ფერადი ბლოკები.
+
+`place(Grounds.Block_Blue)`
+@unlock_descr_underground_senses = დრონის სენსორები მიწისქვეშა უჯრებთან სამუშაოდ
+
+`while get_pos_z() < 100:
+    dig()`
+@unlock_descr_petrified_pumpkins = მიწისქვეშ ჩნდება გაქვავებული გოგრები.
+@unlock_descr_special_soils = აღმოაჩინე თიხნარისა და პერლიტის ფენები მცენარეების მოსავლიანობის გასაზრდელად.
+@unlock_descr_bamboo = დარგე ბამბუკი და უყურე, როგორ იზრდება.
+
+`plant(Entities.Bamboo)`
+@unlock_descr_dynamite = იპოვე და გამოიყენე დინამიტი რამის ასაფეთქებლად.
+@unlock_descr_treasure_map = მოძებნე ღრმად დამალული განძი.
+@unlock_descr_mushrooms = იპოვე და მოკრიფე მიწისქვეშა სოკოები სოკოს ტიპის დამთხვევით.
+@multi_unlock_descr_expand = აფართოებს ფერმას. ეს ფერმასაც ასუფთავებს.
+@multi_unlock_descr_carrots = ზრდის სტაფილოს მოსავლიანობასა და ფასს.
+@multi_unlock_descr_rice = ზრდის ბრინჯის მოსავლიანობასა და ფასს.
+@multi_unlock_descr_trees = ზრდის ბუჩქებისა და ხეების მოსავლიანობას.
+@multi_unlock_descr_pumpkins = ზრდის გოგრის მოსავლიანობასა და ფასს.
+@multi_unlock_descr_mazes = ზრდის ოქროს რაოდენობას განძის ზარდახშებში და ლაბირინთის შესაქმნელად საჭირო უცნაური სუბსტანციის რაოდენობას.
+@multi_unlock_descr_sunflowers = ზრდის მზესუმზირებიდან მიღებულ ენერგიას.
+@multi_unlock_descr_cactus = ზრდის კაქტუსის მოსავლიანობასა და ფასს.
+@multi_unlock_descr_dinosaur = ზრდის დინოზავრების მოსავლიანობასა და ფასს.
+@multi_unlock_descr_polyculture = ზრდის პოლიკულტურის მოსავლიანობის მამრავლს.
+@multi_unlock_descr_watering = მიიღე მეტი წყალი.
+@multi_unlock_descr_fertilizer = მიიღე მეტი სასუქი.
+@multi_unlock_descr_megafarm = კიდევ უფრო ზრდის დრონების რაოდენობას.
+@multi_unlock_descr_drill = ზრდის ბურღის სიჩქარეს.
+@multi_unlock_descr_coal = მიწისქვეშ მეტი ქვანახშირის ფენა ჩნდება.
+@multi_unlock_descr_iron = ზრდის რკინის მადნის მოსავლიანობას.
+@multi_unlock_descr_pyramid = ზრდის პირამიდების აღდგენით მიღებულ ენერგიას.
+@multi_unlock_descr_quartz = ზრდის კვარცის მადნის მოსავლიანობას.
+@multi_unlock_descr_petrified_pumpkins = ზრდის გაქვავებული გოგრების მოსავლიანობას.
+@multi_unlock_descr_dynamite = ზრდის დინამიტის მოსავლიანობასა და აფეთქებების ენერგიას.
+@unlock_descr_explosive_drill = ყველაზე მძლავრი ბურღი.
+@multi_unlock_descr_treasure_map = ზრდის განძის ბილიკის სიღრმეს და, შესაბამისად, განძიდან მიღებულ ოქროს.
+@multi_unlock_descr_ore_boost = კიდევ უფრო ზრდის ქვანახშირის მოსავლიანობას. კიდევ უფრო ზრდის რკინისა და კვარცის ძარღვების ზომას.
+@multi_unlock_descr_bamboo = ზრდის ბამბუკის მოსავლიანობასა და ფასს.
+@multi_unlock_descr_mushrooms = ზრდის დამთხვეული სოკოს ბლოკების მოსავლიანობას.
+@auto_unlock = ავტომატური განბლოკვა
+@cactus = კაქტუსი
+@carrots = სტაფილო
+@rice = ბრინჯი
+@costs = ფასები
+@debug = გამართვა
+@debug_2 = გამართვა 2
+@dictionaries = ლექსიკონები
+@dinosaurs = დინოზავრები
+@expand = გაფართოება
+@expand_2 = გაფართოება 2
+@fertilizer = სასუქი
+@functions = ფუნქციები
+@grass = ბალახი
+@hats = ქუდები
+@import = იმპორტი
+@leaderboard = რეიტინგი
+@underground_leaderboard = მიწისქვეშა რეიტინგი
+@lists = სიები
+@loops = ციკლები
+@mazes = ლაბირინთები
+@megafarm = მეგაფერმა
+@operators = ოპერატორები
+@plant = დარგვა
+@polyculture = პოლიკულტურა
+@pumpkins = გოგრები
+@senses = გრძნობები
+@underground_senses = მიწისქვეშა გრძნობები
+@debug_place = ფერადი ბლოკები
+@simulation = სიმულაცია
+@speed = სიჩქარე
+@sunflowers = მზესუმზირები
+@timing = დროის აღრიცხვა
+@trees = ხეები
+@the_farmers_remains = ?
+@top_hat = ცილინდრი
+@utilities = დამხმარე ფუნქციები
+@variables = ცვლადები
+@watering = მორწყვა
+@iron = რკინა
+@pyramid = პირამიდები
+@ore_boost = მადნის გაძლიერება
+@petrified_pumpkins = გაქვავებული გოგრები
+@special_soils = სპეციალური ნიადაგები
+@mining = სამთო საქმე
+@coal = ქვანახშირი
+@drill = ბურღი
+@quartz = კვარცი
+@prospecting = რკინის ძიება
+@dynamite = დინამიტი
+@explosive_drill = ფეთქებადი ბურღი
+@bamboo = ბამბუკი
+@treasure_map = განძის რუკა
+@mushrooms = სოკო
+@jump = გადახტომა
