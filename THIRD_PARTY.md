@@ -9,6 +9,14 @@
 - Copyright 2022 The Noto Project Authors
 - License: SIL Open Font License 1.1, see `src/KaLanguage/fonts/OFL.txt`
 
+## Lucide icons
+
+- Files: `src/JsMod/icons/svg/*.svg` (unmodified) and `src/JsMod/icons/*.png` (rasterized by `tools/rasterize_icons.py`, recoloured white with a stroke of 2.5)
+- Icons: braces, undo-2, redo-2, copy, check, circle-question-mark, search
+- Source: https://github.com/lucide-icons/lucide/releases/download/1.69.0/lucide-icons-1.69.0.zip, release tag `1.69.0`
+- Archive sha256: `a6135e83220d1b0757d182d1adfc2e91dbdfbb8df22755fe57775fc8a715a46e`
+- License: ISC, with parts under MIT from Feather, see `src/JsMod/icons/LICENSE`
+
 ## The Farmer Was Replaced text
 
 `translations/KA` is a translation of the game's `Languages` text, which the game
