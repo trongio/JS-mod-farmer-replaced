@@ -146,3 +146,36 @@ speaker's check.
 
 - Discord, Python, Vsync: product and technical names.
 - Everything in code, such as `Items.Hay`, `North`, `True`.
+
+## Added with the docs
+
+| English | ქართული | Note |
+|---|---|---|
+| scope | არე | |
+| breakpoint | გაჩერების წერტილი | |
+| step-by-step mode | ნაბიჯ-ნაბიჯ რეჟიმი | |
+| constant | მუდმივი | |
+| output | გამოსავალი | |
+| loop body | ციკლის ტანი | |
+| reference | მიმართვა | |
+| unpack | გაშლა | |
+| parameter | პარამეტრი | |
+| side effect | გვერდითი ეფექტი | |
+| external editor | გარე რედაქტორი | |
+| backup | სარეზერვო ასლი | |
+| floating-point | მცურავმძიმიანი | review |
+| remainder | ნაშთი | |
+| binary search | ორობითი ძიება | |
+| race condition | რბოლის პირობა | review |
+| shared memory | საერთო მეხსიერება | |
+| bubble sort | ბუშტულა დალაგება | review |
+| push (a block) | გადაწევა | review |
+| vein | ძარღვი | |
+| ore | მადანი | |
+| cave-in | ჩამონგრევა | |
+| dowsing rod | მაძიებელი წკეპლა | review |
+| Dynamite Sweeper | დინამიტის მაძიებელი | pun on Minesweeper, review |
+| seedling | ჩითილი | |
+| spoiler labels | აჩვენე მინიშნება | translated, the game shows them to the player |
+
+Page titles for code keywords keep the keyword in lowercase English: `if` ინსტრუქცია, `while` ციკლი. Written without backticks in headings and link text.

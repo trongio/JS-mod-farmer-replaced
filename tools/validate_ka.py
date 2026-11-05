@@ -60,6 +60,9 @@ def code_spans(value: str) -> list[str]:
     return CODE_SPLIT.split(value)[1::2]
 
 
+SPOILER_LABEL = re.compile(r"<spoiler=[^>]*>")
+
+
 def prose(value: str) -> str:
     return "".join(CODE_SPLIT.split(value)[0::2])
 
@@ -83,7 +86,9 @@ def compare_value(en: str, ka: str) -> list[str]:
         ("tags", TAG),
     )
     for label, pattern in checks:
-        a, b = Counter(pattern.findall(prose(en))), Counter(pattern.findall(prose(ka)))
+        # Spoiler labels are shown to the player, so only their presence must match.
+        a = Counter(pattern.findall(SPOILER_LABEL.sub("<spoiler=>", prose(en))))
+        b = Counter(pattern.findall(SPOILER_LABEL.sub("<spoiler=>", prose(ka))))
         if a != b:
             problems.append(f"{label} changed: missing {sorted((a - b).elements())}, added {sorted((b - a).elements())}")
     for brace in "{}":
