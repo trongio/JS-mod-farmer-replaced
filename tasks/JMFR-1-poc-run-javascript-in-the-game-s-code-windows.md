@@ -26,9 +26,9 @@ keep working unchanged.
 
 - [x] Headless: `dotnet build` passes and the JS/Python tree parity tests pass
 - [x] Headless: invalid JS raises `ParseException` at the right span
-- [ ] In game: BepInEx loads the plugin under Proton
+- [x] In game: BepInEx loads the plugin under Proton
 - [ ] In game: `while (true) { harvest(); move(North); }` runs with the same tick cost as the Python equivalent
-- [ ] In game: a Python file in the same save still runs
+- [x] In game: a Python file in the same save still runs
 - [ ] In game: invalid JS shows an error at the right position, and highlighting is usable
 - [ ] In game: breakpoints, step mode and `spawn_drone(fn)` work with JS
 - [ ] In game: a completed `leaderboard_run` uploads no score
@@ -41,4 +41,5 @@ keep working unchanged.
 - Workflow agents are unavailable until a session restart, so built-in agents stand in for the same roles.
 - CoreCLR loads the game's `Core.dll`, so tests use the game's parser and interpreter nodes as the oracle. Builtins that need the farm or Unity (`harvest`, `Items.*`) are only compared as trees, or checked in game.
 - Installed in the game folder (nothing existing was overwritten), to uninstall delete: `.doorstop_version`, `changelog.txt`, `doorstop_config.ini`, `winhttp.dll`, and the `BepInEx/` folder. Then remove the `WINEDLLOVERRIDES` launch option.
-- Owner step before in-game checks: set the Steam launch option `WINEDLLOVERRIDES="winhttp=n,b" %command%`.
+- Mod loading uses a `winhttp` native override in the game prefix `pfx/user.reg` (backup `user.reg.bak-jsmod`), so no Steam launch option is needed on this PC. Other users still need the launch option.
+- First in-game run 2026-11-06: `harvest();` under `// @js` harvested, Python `harvest()` harvested, and `let = 3;` showed the error box on `=`. Loops, tick comparison, breakpoints, step mode, `spawn_drone` and `leaderboard_run` are still untested in game because they need unlocks.
