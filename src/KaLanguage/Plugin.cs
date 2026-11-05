@@ -12,7 +12,8 @@ using UnityEngine.TextCore.LowLevel;
 namespace KaLanguage
 {
     /// Adds Georgian as a game language: installs the pack, adds a Georgian font,
-    /// and shows the language's own name. Changes no game logic or scores.
+    /// and shows the language's own name. Blocks leaderboard uploads, because the session
+    /// is modded, and stays off entirely if it can't.
     [BepInPlugin("trongio.tfwr.kalanguage", "Georgian Language", "0.1.0")]
     public class Plugin : BaseUnityPlugin
     {
@@ -26,13 +27,39 @@ namespace KaLanguage
         private void Awake()
         {
             log = Logger;
+            var harmony = new Harmony("trongio.tfwr.kalanguage");
+            try
+            {
+                BlockLeaderboardUploads(harmony);
+                log.LogInfo("leaderboard block: ok");
+            }
+            catch (Exception ex)
+            {
+                harmony.UnpatchSelf();
+                log.LogError("leaderboard block: FAILED, so the Georgian plugin stays off: " + ex);
+                return;
+            }
             string pluginDir = Path.GetDirectoryName(Info.Location);
             Step("language pack", () => SyncPack(pluginDir));
             Step("language dropdown", AddToLoadedDropdown);
-            Step("language name patch", () => new Harmony("trongio.tfwr.kalanguage").Patch(
+            Step("language name patch", () => harmony.Patch(
                 AccessTools.Method(typeof(Localizer), nameof(Localizer.Localize)),
                 postfix: new HarmonyMethod(typeof(Plugin), nameof(LocalizePostfix))));
             Step("Georgian font", () => AddFont(pluginDir));
+        }
+
+        /// Score 0 is the game's own path for showing a leaderboard without uploading. Both call
+        /// sites are covered. This is safe beside JsMod, which forces the same value.
+        private static void BlockLeaderboardUploads(Harmony harmony)
+        {
+            var prefix = new HarmonyMethod(typeof(Plugin), nameof(ForceScoreZero));
+            harmony.Patch(AccessTools.Method(typeof(Leaderboard), nameof(Leaderboard.FillLeaderboard)), prefix: prefix);
+            harmony.Patch(AccessTools.Method(typeof(SteamLeaderboard), nameof(SteamLeaderboard.LoadLeaderboard)), prefix: prefix);
+        }
+
+        private static void ForceScoreZero(ref int score)
+        {
+            score = 0;
         }
 
         private static void Step(string name, Action action)
