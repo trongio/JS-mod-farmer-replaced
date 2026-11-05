@@ -17,6 +17,8 @@ namespace JsMod.Patches
         private const string TemplateName = "language";
 
         private static DropdownOptionSO option;
+        private static bool rowFailed;
+        private static bool seeding;
         private static FieldInfo dirty;
         private static FieldInfo parseLock;
         private static MethodInfo closeError;
@@ -40,6 +42,10 @@ namespace JsMod.Patches
         public static IEnumerable<OptionSO> AllOptions()
         {
             IEnumerable<OptionSO> options = ResourceManager.GetAllOptions();
+            if (rowFailed)
+            {
+                return options;
+            }
             try
             {
                 return WithOurOption(options.ToList());
@@ -47,6 +53,8 @@ namespace JsMod.Patches
             catch (Exception ex)
             {
                 // Without a row the player couldn't switch back, so a saved JavaScript must not stay in force.
+                // Stays off for the session, so a later menu can't show a choice that no longer applies.
+                rowFailed = true;
                 LanguageMode.ReadSetting = null;
                 Reparse();
                 Plugin.Log.LogWarning("Could not add the programming language row, so plain code stays Python. The // @js marker still works: " + ex);
@@ -82,7 +90,16 @@ namespace JsMod.Patches
             // The dropdown shows a blank box for a value it doesn't list, and OptionHolder doesn't know this option's default.
             if (!option.options.Contains(OptionHolder.GetString(LanguageMode.OptionName)))
             {
-                OptionHolder.SetOption(LanguageMode.OptionName, LanguageMode.Python);
+                // A missing or invalid value already reads as Python, so nothing needs re-parsing. Re-parsing here would mark the save as changed.
+                seeding = true;
+                try
+                {
+                    OptionHolder.SetOption(LanguageMode.OptionName, LanguageMode.Python);
+                }
+                finally
+                {
+                    seeding = false;
+                }
             }
             options.Add(option);
             return options;
@@ -90,7 +107,7 @@ namespace JsMod.Patches
 
         private static void OnOptionChanged(string item)
         {
-            if (item == LanguageMode.OptionName)
+            if (item == LanguageMode.OptionName && !seeding)
             {
                 Reparse();
             }

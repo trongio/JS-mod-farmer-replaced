@@ -17,10 +17,6 @@ namespace JsMod.Lang
                     return georgian
                         ? "აირჩიე, რომელ ენაზე დაწერ კოდს. ფაილი შეიძლება ამ არჩევანს პირველი ხაზით შეცვალოს: // @js ან # @py."
                         : "Choose which language you write code in. A file can override this choice with its first line: // @js or # @py.";
-                case LanguageMode.Python:
-                case LanguageMode.JavaScript:
-                    // The values are names, so they stay the same in every language, even if a language file gains these keys.
-                    return key;
                 default:
                     return null;
             }
