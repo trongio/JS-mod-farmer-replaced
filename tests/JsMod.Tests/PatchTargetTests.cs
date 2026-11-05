@@ -28,6 +28,7 @@ public class PatchTargetTests
         AssertTarget(typeof(SteamLeaderboard), "LoadLeaderboard", "score");
         AssertTarget(typeof(CodeWindow), "InsertNewLineIndentation", "inserted");
         AssertTarget(typeof(CodeWindow), "GetWordList");
+        AssertTarget(typeof(Achievements), "UnlockAchievement", "achievement");
     }
 
     [Fact]

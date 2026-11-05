@@ -27,4 +27,14 @@ namespace JsMod.Patches
             score = 0;
         }
     }
+
+    /// <summary>These two unlock only from finishing a leaderboard run, which a modded session shouldn't earn.</summary>
+    [HarmonyPatch(typeof(Achievements), nameof(Achievements.UnlockAchievement))]
+    internal static class LeaderboardAchievementPatch
+    {
+        private static bool Prefix(string achievement)
+        {
+            return achievement != "COMPETITIVE_FARMING" && achievement != "FULL_AUTOMATION";
+        }
+    }
 }

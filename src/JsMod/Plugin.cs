@@ -29,14 +29,19 @@ namespace JsMod
             }
             try
             {
-                harmony.CreateClassProcessor(typeof(TokenizePatch)).Patch();
+                // Parse first: it ignores anything without the JS sentinel, which only the Tokenize patch can produce.
                 harmony.CreateClassProcessor(typeof(ParsePatch)).Patch();
+                harmony.CreateClassProcessor(typeof(TokenizePatch)).Patch();
             }
             catch (Exception ex)
             {
+                // Both or neither. The leaderboard block stays on, because the session is still modded.
+                harmony.Unpatch(AccessTools.Method(typeof(Tokenizer), nameof(Tokenizer.Tokenize)), HarmonyPatchType.All, harmony.Id);
+                harmony.Unpatch(AccessTools.Method(typeof(Parser), nameof(Parser.Parse)), HarmonyPatchType.All, harmony.Id);
                 Log.LogError("Could not patch the game's language pipeline, so JavaScript will not run: " + ex);
                 return;
             }
+            PatchOptional(harmony, typeof(LeaderboardAchievementPatch));
             PatchOptional(harmony, typeof(HighlightPatch));
             PatchOptional(harmony, typeof(AutoIndentPatch));
             PatchOptional(harmony, typeof(WordListPatch));
