@@ -41,6 +41,7 @@ namespace JsMod.Lang
                 "PhpStorm გაშვების, გაჩერების, ნაბიჯისა და ხაზის წაშლის კლავიშებს PhpStorm-ისაზე აყენებს. Game თამაშის კლავიშებს აბრუნებს."
             },
             ["editor shortcut tooltip"] = new[] { "A code editor shortcut. Click to change it.", "კოდის რედაქტორის მალსახმობი. დააჭირე მის შესაცვლელად." },
+            ["editor run code"] = new[] { "Run code", "კოდის გაშვება" },
             ["editor format code"] = new[] { "Format code", "კოდის ფორმატირება" },
             ["editor duplicate line"] = new[] { "Duplicate line", "ხაზის დუბლირება" },
             ["editor delete line"] = new[] { "Delete line", "ხაზის წაშლა" },

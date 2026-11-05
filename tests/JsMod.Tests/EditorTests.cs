@@ -417,6 +417,9 @@ public class EditorTests
     public void FindMatchesExactModifiers()
     {
         Func<EditorBindings.Binding, KeyCombination> defaults = b => EditorBindings.Parse(b.DefaultKeys);
+        Assert.Equal(EditorAction.Run, EditorBindings.Find(defaults, KeyCode.Return, true, false, false).Action);
+        Assert.Equal(EditorAction.NewLineBelow, EditorBindings.Find(defaults, KeyCode.Return, false, false, true).Action);
+        Assert.Null(EditorBindings.Find(defaults, KeyCode.Return, false, false, false));
         Assert.Equal(EditorAction.Format, EditorBindings.Find(defaults, KeyCode.L, true, true, false).Action);
         Assert.Null(EditorBindings.Find(defaults, KeyCode.L, true, false, false));
         Assert.Equal(EditorAction.Duplicate, EditorBindings.Find(defaults, KeyCode.D, true, false, false).Action);

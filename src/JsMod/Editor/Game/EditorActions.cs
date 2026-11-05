@@ -35,6 +35,10 @@ namespace JsMod.Editor.Game
                 bool isJs = LanguageMode.IsJs(text, window);
                 switch (action)
                 {
+                    case EditorAction.Run:
+                        // Shortcuts only reach here while the window isn't running, so this always starts it.
+                        window.PressExecuteOrStop();
+                        return;
                     case EditorAction.Format:
                         Format(window, false);
                         return;

@@ -9,6 +9,7 @@ namespace JsMod.Editor
 {
     public enum EditorAction
     {
+        Run,
         Format,
         Duplicate,
         DeleteLine,
@@ -42,6 +43,7 @@ namespace JsMod.Editor
 
         public static readonly IReadOnlyList<Binding> All = new[]
         {
+            new Binding { Action = EditorAction.Run, OptionName = "editor run code", DefaultKeys = "Ctrl Return" },
             new Binding { Action = EditorAction.Format, OptionName = "editor format code", DefaultKeys = "Ctrl Alt L" },
             new Binding { Action = EditorAction.Duplicate, OptionName = "editor duplicate line", DefaultKeys = "Ctrl D" },
             // PhpStorm's Ctrl Y is the game's second redo key, so this starts unbound. The PhpStorm preset swaps them.
