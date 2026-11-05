@@ -9,6 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../src/JsMod/Lang/*.cs" LinkBase="Lang" />
+    <Compile Include="../../src/JsMod/Editor/*.cs" LinkBase="Editor" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Core"><HintPath>$(ManagedDir)/Core.dll</HintPath><Private>false</Private></Reference>
