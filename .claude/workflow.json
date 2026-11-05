@@ -6,7 +6,27 @@
   "milestone": {
     "label": "v1"
   },
-  "gates": [],
+  "gates": [
+    {
+      "name": "build",
+      "cmd": "PATH=$HOME/.dotnet:$PATH dotnet build src/JsMod/JsMod.csproj -c Release -nologo -v q",
+      "when": [
+        "src/",
+        "Directory.Build.props",
+        "nuget.config"
+      ]
+    },
+    {
+      "name": "test",
+      "cmd": "PATH=$HOME/.dotnet:$PATH dotnet test tests/JsMod.Tests -nologo",
+      "when": [
+        "src/",
+        "tests/",
+        "Directory.Build.props",
+        "nuget.config"
+      ]
+    }
+  ],
   "worktree": {
     "link": [],
     "copy": [],
@@ -17,10 +37,13 @@
     "design": []
   },
   "risk": {
-    "high": []
+    "high": [
+      "src/JsMod/Patches/LeaderboardPatches.cs"
+    ]
   },
   "overnight": {
     "parallel": 2,
     "model": "opus"
-  }
+  },
+  "push": false
 }
