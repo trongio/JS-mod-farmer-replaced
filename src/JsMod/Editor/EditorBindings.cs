@@ -102,7 +102,7 @@ namespace JsMod.Editor
                 page.Append(string.IsNullOrEmpty(bound) ? unbound : "`" + bound + "`").Append(": ").Append(ModStrings.Lookup(binding.OptionName, language)).Append('\n');
             }
             page.Append('\n');
-            foreach (string option in new[] { "start execution", "stop execution", "pause execution", "next step", "search", "autocomplete", "undo", "redo 1", "save" })
+            foreach (string option in new[] { "start execution", "stop execution", "pause execution", "next step", "search", "autocomplete", "indent selection", "unindent selection", "undo", "redo 1", "save" })
             {
                 string bound = stockKeys(option);
                 page.Append(string.IsNullOrEmpty(bound) ? unbound : "`" + bound + "`").Append(": ").Append(label(option)).Append('\n');

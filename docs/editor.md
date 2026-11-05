@@ -25,6 +25,7 @@ Modelled on PhpStorm's default keymap, and changeable in Options > Controls. The
 | Keys | Action |
 |---|---|
 | `Ctrl Enter` | Run the code (does nothing while it's already running) |
+| `Tab` / `Shift Tab` | Indent or unindent lines (the game's own keys) |
 | `Ctrl Alt L` | Format code |
 | `Ctrl D` | Duplicate line or selection |
 | not set | Delete line (`Ctrl Y` is the game's second redo key) |
