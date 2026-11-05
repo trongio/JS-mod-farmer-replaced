@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyName>KaLanguage</AssemblyName>
+    <RootNamespace>KaLanguage</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!-- Override with -p:GameDir="/path/to/The Farmer Was Replaced" or TFWR_GAME_DIR. -->
+    <GameDir Condition="'$(GameDir)' == '' And '$(TFWR_GAME_DIR)' != ''">$(TFWR_GAME_DIR)</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">/media/azael/Storage/SteamLibrary/steamapps/common/The Farmer Was Replaced</GameDir>
+    <ManagedDir>$(GameDir)/TheFarmerWasReplaced_Data/Managed</ManagedDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Plugin.cs" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="Utils"><HintPath>$(ManagedDir)/Utils.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ManagedDir)/UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedDir)/UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.TextCoreFontEngineModule"><HintPath>$(ManagedDir)/UnityEngine.TextCoreFontEngineModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.TextCoreTextEngineModule"><HintPath>$(ManagedDir)/UnityEngine.TextCoreTextEngineModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.TextRenderingModule"><HintPath>$(ManagedDir)/UnityEngine.TextRenderingModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Unity.TextMeshPro"><HintPath>$(ManagedDir)/Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackFile Include="../../translations/KA/**/*" RelativeTo="KA" />
+    <FontFile Include="fonts/*" />
+  </ItemGroup>
+
+  <!-- Lays out the plugin folder next to the DLL. -->
+  <Target Name="CopyPack" AfterTargets="Build">
+    <Copy SourceFiles="@(PackFile)" DestinationFiles="@(PackFile->'$(OutDir)KA/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(FontFile)" DestinationFolder="$(OutDir)fonts" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="DeployToGame" AfterTargets="CopyPack" Condition="Exists('$(GameDir)/BepInEx')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(GameDir)/BepInEx/plugins/KaLanguage" />
+    <Copy SourceFiles="@(PackFile)" DestinationFiles="@(PackFile->'$(GameDir)/BepInEx/plugins/KaLanguage/KA/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(FontFile)" DestinationFolder="$(GameDir)/BepInEx/plugins/KaLanguage/fonts" SkipUnchangedFiles="true" />
+  </Target>
+</Project>
