@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Linq;
+using System.IO;
 using System;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -136,8 +140,18 @@ public class LanguageModeTests : IDisposable
         Assert.False(LanguageMode.IsJs(code, TestSupport.FakeWindow()));
         // UISim.SetupSim and any other caller with no patched window around it.
         Assert.False(LanguageMode.IsJsWhileTokenizing(code));
-        Assert.False(LanguageMode.IsJsWhileColouring(code));
+    }
+
+    [Fact]
+    public void CodeWithNoWindowIsColouredInTheLanguageOfTheSetting()
+    {
+        const string code = "x = 1";
         Assert.Equal("original", JsHighlighter.Select("original", code));
+        UseSetting(LanguageMode.Python);
+        Assert.Equal("original", JsHighlighter.Select("original", code));
+        UseSetting(LanguageMode.JavaScript);
+        Assert.Equal(JsHighlighter.Pattern, JsHighlighter.Select("original", code));
+        Assert.Equal("original", JsHighlighter.Select("original", "# @py\nx = 1"));
     }
 
     [Fact]
@@ -193,8 +207,11 @@ public class LanguageModeTests : IDisposable
         UseSetting(LanguageMode.JavaScript);
         CodeWindow outer = LanguageMode.EnterTokenizing(PlayerWindow());
         Assert.True(LanguageMode.IsJsWhileTokenizing("x = 1;"));
-        Assert.False(LanguageMode.IsJsWhileColouring("x = 1;"));
         LanguageMode.ExitTokenizing(outer);
+        // A docs example is coloured as Python while it has no JS code, even though the setting is JS.
+        CodeWindow outerColour = LanguageMode.EnterColouring(DocsExampleWindow());
+        Assert.False(LanguageMode.IsJsWhileColouring("x = 1;"));
+        LanguageMode.ExitColouring(outerColour);
         outer = LanguageMode.EnterColouring(PlayerWindow());
         Assert.True(LanguageMode.IsJsWhileColouring("x = 1;"));
         Assert.False(LanguageMode.IsJsWhileTokenizing("x = 1;"));
@@ -282,5 +299,130 @@ public class LanguageModeTests : IDisposable
     public void OptionTextByLanguage(string language, string key, string expected)
     {
         Assert.Equal(expected, ModStrings.Lookup(key, language));
+    }
+
+    [Fact]
+    public void WordListFollowsWhatIsUnlocked()
+    {
+        List<string> early = Display.JsWordList(new[] { "harvest", "while", "if" });
+        Assert.Contains("while", early);
+        Assert.Contains("let", early);
+        Assert.Contains("const", early);
+        Assert.DoesNotContain("function", early);
+        Assert.DoesNotContain("true", early);
+        Assert.DoesNotContain("of", early);
+        List<string> later = Display.JsWordList(new[] { "def", "True", "False", "None", "for", "elif", "and", "import", "from", "my_var" });
+        Assert.Contains("function", later);
+        Assert.Contains("true", later);
+        Assert.Contains("false", later);
+        Assert.Contains("null", later);
+        Assert.Contains("of", later);
+        Assert.Contains("import", later);
+        Assert.Contains("from", later);
+        Assert.Contains("my_var", later);
+        Assert.DoesNotContain("def", later);
+        Assert.DoesNotContain("True", later);
+        Assert.DoesNotContain("elif", later);
+        Assert.DoesNotContain("and", later);
+        Assert.Equal(later.OrderBy(w => w, StringComparer.CurrentCulture), later);
+    }
+
+    [Theory]
+    [InlineData("    }", 5, "}", 1)]
+    [InlineData("if (a) {\n        }", 18, "if (a) {\n    }", 14)]
+    [InlineData("\t}", 2, "}", 1)]
+    [InlineData("\t\t}", 3, "\t}", 2)]
+    [InlineData("  }", 3, "}", 1)]
+    public void ClosingBraceMovesBackOneLevel(string text, int caret, string expected, int expectedCaret)
+    {
+        Assert.True(Display.OutdentClosingBrace(ref text, ref caret));
+        Assert.Equal(expected, text);
+        Assert.Equal(expectedCaret, caret);
+    }
+
+    [Theory]
+    [InlineData("}", 1)]
+    [InlineData("a }", 3)]
+    [InlineData("    x", 5)]
+    [InlineData("    {", 5)]
+    public void ClosingBraceIsLeftAloneWhenNotFirstOnItsLine(string text, int caret)
+    {
+        string before = text;
+        Assert.False(Display.OutdentClosingBrace(ref text, ref caret));
+        Assert.Equal(before, text);
+    }
+
+    [Theory]
+    [InlineData("import \"", true)]
+    [InlineData("import ", true)]
+    [InlineData("import * from \"", true)]
+    [InlineData("import { a } from \"", true)]
+    [InlineData("import * as ", true)]
+    [InlineData("from ", true)]
+    [InlineData("let x = ", false)]
+    [InlineData("", false)]
+    [InlineData("\"", false)]
+    public void FileNamesAreOfferedInJsImports(string before, bool expected)
+    {
+        Assert.Equal(expected, Display.IsJsImportPosition(before, before.Length));
+    }
+
+    [Fact]
+    public void SignatureIncludesTheCommentsAboveIt()
+    {
+        const string source = "let a = 1;\n// first\n// second\nfunction f() {\n}";
+        int start = source.IndexOf("function", StringComparison.Ordinal);
+        string nl = Environment.NewLine;
+        Assert.Equal("// first" + nl + "// second" + nl + "function f() {", Display.SignatureWithComments(source, "function f() {", start));
+        Assert.Equal("function g() {", Display.SignatureWithComments("function g() {\n}", "function g() {", 0));
+        Assert.Equal("function h() {", Display.SignatureWithComments("let a = 1;\nfunction h() {\n}", "function h() {", 11));
+    }
+
+    [Fact]
+    public void ErrorsAreEnglishExceptInGeorgian()
+    {
+        const string message = "Expected ';' or a new line, found ':'.";
+        Assert.Equal(message, JsErrors.Translate(message, "EN"));
+        Assert.Equal(message, JsErrors.Translate(message, null));
+        Assert.Equal("აქ ';' ან ახალი ხაზი უნდა იყოს, მაგრამ აქ არის ':'.", JsErrors.Translate(message, "KA"));
+        Assert.Equal("აქ სახელი უნდა იყოს, მაგრამ კოდი დასრულდა.", JsErrors.Translate("Expected a name, but the code ended.", "KA"));
+        Assert.Equal("აქ სახელი უნდა იყოს, მაგრამ ხაზი დასრულდა.", JsErrors.Translate("Expected a name, but the line ended.", "KA"));
+        Assert.Equal("harvest ფრჩხილების გარეშე არაფერს აკეთებს. ხომ არ გულისხმობდი harvest()-ს?", JsErrors.Translate("harvest does nothing without brackets. Did you mean harvest()?", "KA"));
+        Assert.Equal("Something else.", JsErrors.Translate("Something else.", "KA"));
+    }
+
+    /// <summary>Reads the parser's source, so a new error message without Georgian text fails here.</summary>
+    [Fact]
+    public void EveryErrorInTheParserHasGeorgianText()
+    {
+        string dir = AppContext.BaseDirectory;
+        while (!File.Exists(Path.Combine(dir, "src", "JsMod", "Lang", "JsParser.cs")))
+        {
+            dir = Path.GetDirectoryName(dir);
+        }
+        string source = File.ReadAllText(Path.Combine(dir, "src", "JsMod", "Lang", "JsParser.cs"));
+        var missing = new List<string>();
+        foreach (Match match in Regex.Matches(source, "(?:new ParseException\\(|Unexpected\\(|return |\\{ \"[^\"]+\", )(\"(?:[^\"\\\\]|\\\\.)*\")(?=,|\\)|;| \\})"))
+        {
+            string text = Regex.Unescape(match.Groups[1].Value.Trim('"'));
+            if (text.Length > 6 && JsErrors.Translate(text, "KA") == text && !text.StartsWith("Expected a name") )
+            {
+                missing.Add(text);
+            }
+        }
+        foreach (string built in new[]
+        {
+            "x does nothing without brackets. Did you mean x()?", "x is a const and can't be reassigned.", "x is a reserved name in this game.",
+            "A file must be imported under its own name, so write: import * as a from \"a\".", "includes() takes exactly one value.",
+            "Math.sin is not available here. Math has abs, floor, max, min and random.", "'class' is not supported here.", "Unexpected ')'.",
+            "Expected ')'", "Invalid number '1x'.", "Unexpected character '@'."
+        })
+        {
+            if (JsErrors.Translate(built, "KA") == built)
+            {
+                missing.Add(built);
+            }
+        }
+        Assert.True(missing.Count == 0, string.Join("\n", missing));
     }
 }

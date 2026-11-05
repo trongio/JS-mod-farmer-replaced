@@ -179,3 +179,17 @@ speaker's check.
 | spoiler labels | აჩვენე მინიშნება | translated, the game shows them to the player |
 
 Page titles for code keywords keep the keyword in lowercase English: `if` ინსტრუქცია, `while` ციკლი. Written without backticks in headings and link text.
+
+## JavaScript parser errors
+
+Used by `src/JsMod/Lang/JsErrors.cs`. Code stays in English there too.
+
+| English | ქართული | Note |
+|---|---|---|
+| arrow function | ისრიანი ფუნქცია | review |
+| ternary operator | სამნაწილიანი ოპერატორი | review |
+| bitwise operator | ბიტური ოპერატორი | |
+| destructuring | დაშლა | same word as unpack |
+| assignment | მინიჭება | |
+| expression | გამოსახულება | |
+| string | სტრიქონი | |

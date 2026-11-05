@@ -36,6 +36,16 @@ public class PatchTargetTests
         AssertTarget(typeof(CodeWindow), "Parse");
         AssertTarget(typeof(Localizer), "Localize", "key");
         AssertTarget(typeof(OptionMenu), "Setup");
+        AssertTarget(typeof(CodeUtilities), "ApplyCodeTags", "code");
+        AssertTarget(typeof(CodeUtilities), "ToNiceString", "obj");
+        AssertTarget(typeof(Localizer), "LoadDoc", "doc");
+        AssertTarget(typeof(CodeExample), "Setup", "code");
+        AssertTarget(typeof(CodeWindow), "IsImportStatement", "text", "stringIndex");
+        AssertTarget(typeof(FunctionNode), "GetSignature");
+        AssertTarget(typeof(TooltipUtils), "KeywordTooltip", "word");
+        AssertTarget(typeof(UnlockBox), "SetupRec");
+        Assert.NotNull(typeof(CodeExample).GetField("codeWindow", Any));
+        Assert.NotNull(typeof(UnlockSO).GetField("displayCode", Any));
     }
 
     [Fact]

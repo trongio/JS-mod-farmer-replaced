@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace JsMod.Lang
 {
     /// <summary>
     /// Decides the language of a piece of code. A marker wins, then the setting, but the setting only reaches real player code
-    /// windows. Everything else, including text that comes with no window at all, is Python.
+    /// windows and docs examples that were swapped to JavaScript. Anything else being run, such as a docs example's setup, is Python.
     /// </summary>
     public static class LanguageMode
     {
@@ -24,13 +25,18 @@ namespace JsMod.Lang
         [ThreadStatic]
         private static CodeWindow colouring;
 
+        // Docs example windows showing JavaScript. Weak, because they go when the page changes.
+        private static readonly ConditionalWeakTable<CodeWindow, object> JsExamples = new ConditionalWeakTable<CodeWindow, object>();
+
+        public static bool SettingIsJs => ReadSetting?.Invoke() == JavaScript;
+
         public static bool IsJs(string code, CodeWindow window)
         {
             if (JsMarker.IsJs(code))
             {
                 return true;
             }
-            return !JsMarker.IsPy(code) && IsPlayerWindow(window) && ReadSetting?.Invoke() == JavaScript;
+            return !JsMarker.IsPy(code) && (IsPlayerWindow(window) || IsJsExample(window)) && SettingIsJs;
         }
 
         public static bool IsJsWhileTokenizing(string code)
@@ -40,7 +46,9 @@ namespace JsMod.Lang
 
         public static bool IsJsWhileColouring(string code)
         {
-            return IsJs(code, colouring);
+            // With no window, this is code in tooltips and docs text, which is shown in the language of the setting.
+            CodeWindow window = colouring;
+            return (object)window != null ? IsJs(code, window) : JsMarker.IsJs(code) || (!JsMarker.IsPy(code) && SettingIsJs);
         }
 
         /// <summary>
@@ -61,6 +69,18 @@ namespace JsMod.Lang
                 }
             }
             return false;
+        }
+
+        /// <summary>Called when a docs example is created. Its code is run as JavaScript only if it's one of ours.</summary>
+        public static void MarkJsExample(CodeWindow window)
+        {
+            JsExamples.Remove(window);
+            JsExamples.Add(window, null);
+        }
+
+        private static bool IsJsExample(CodeWindow window)
+        {
+            return (object)window != null && JsExamples.TryGetValue(window, out _);
         }
 
         public static CodeWindow EnterTokenizing(CodeWindow window)

@@ -1,0 +1,1037 @@
+# Python code spans from the game text mapped to JavaScript. Exact match. @@js frag marks text that is not a whole program.
+@@py
+
+    def g():
+        pass
+@@js frag
+
+    function g() {
+    }
+}
+@@py
+
+    y = 1
+
+    
+@@js frag
+
+    let y = 1;
+
+    
+@@py
+#
+@@js
+//
+@@py
+# Dig into a dynamite block and check the puzzle state
+def dig_dynamite():
+    dig()
+    if get_ground_type() != Grounds.Soot:
+        # Dug into live dynamite, puzzle failed
+        return False
+    elif measure() == None:
+        # Dug up final dud block, puzzle solved
+        return True
+    else:
+        # Got a count from measuring, puzzle still ongoing
+        return None
+
+@@js
+// Dig into a dynamite block and check the puzzle state
+function dig_dynamite() {
+    dig();
+    if (get_ground_type() != Grounds.Soot) {
+        // Dug into live dynamite, puzzle failed
+        return false;
+    } else if (measure() == null) {
+        // Dug up final dud block, puzzle solved
+        return true;
+    } else {
+        // Got a count from measuring, puzzle still ongoing
+        return null;
+    }
+}
+
+@@py
+#loop body
+@@js
+// loop body
+@@py
+(0,0)
+@@js
+[0, 0]
+@@py
+(1, 2)
+@@js
+[1, 2]
+@@py
+(Unlock.Carrots, 3)
+@@js
+[Unlocks.Carrots, 3]
+@@py
+(companion_type, (companion_x_position, companion_y_position))
+@@js
+[companion_type, [companion_x_position, companion_y_position]]
+@@py
+(x == 5) or 6
+@@js
+(x == 5) || 6
+@@py
+(x == 5) or True
+@@js
+(x == 5) || true
+@@py
+(x, y)
+@@js
+[x, y]
+@@py
++, -, *, /, //, %, **
+@@js frag
++, -, *, /, %, **
+@@py
++, -, *, /, //, %, and, or, ...
+@@js frag
++, -, *, /, %, &&, ||, ...
+@@py
+//
+@@js
+Math.floor(a / b)
+@@py
+def f():
+@@js frag
+function f()
+@@py
+{1:2}
+@@js frag
+{1: 2}
+@@py
+(x,y)
+@@js
+[x,y]
+@@py
+a = 2
+@@js
+let a = 2
+@@py
+False
+@@js
+false
+@@py
+True
+@@js
+true
+@@py
+None
+@@js
+null
+@@py
+a = 5
+@@js
+let a = 5
+@@py
+a_global_variable = "global"
+
+def main():
+    a_local_variable = "local"
+    # do things
+
+if __name__ == "__main__":
+    main()
+@@js
+let a_global_variable = "global";
+
+function main() {
+    let a_local_variable = "local";
+    // do things
+}
+
+if (__name__ == "__main__") {
+    main();
+}
+@@py
+and
+@@js frag
+&&
+@@py
+b = can_harvest()
+@@js
+let b = can_harvest()
+@@py
+companion = get_companion()
+if companion != None:
+    plant_type, (x, y) = companion
+    print("Companion:", plant_type, "at", x, ",", y)
+@@js
+let companion = get_companion();
+if (companion != null) {
+    let [plant_type, [x, y]] = companion;
+    print("Companion:", plant_type, "at", x, ",", y);
+}
+@@py
+cost = get_cost(Entities.Carrot)
+for item in cost:
+	amount_needed = cost[item]
+@@js
+let cost = get_cost(Entities.Carrot);
+for (const item of cost) {
+    let amount_needed = cost[item];
+}
+@@py
+cost = get_cost(Unlocks.Carrots)
+for item in cost:
+    if num_items(item) < cost[item]:
+        print("not enough items to unlock carrots")
+@@js
+let cost = get_cost(Unlocks.Carrots);
+for (const item of cost) {
+    if (num_items(item) < cost[item]) {
+        print("not enough items to unlock carrots");
+    }
+}
+@@py
+def
+@@js frag
+function
+@@py
+def do_two_flips():
+    do_a_flip()
+    do_a_flip()
+
+do_two_flips()
+@@js
+function do_two_flips() {
+    do_a_flip();
+    do_a_flip();
+}
+
+do_two_flips();
+@@py
+def f():
+    
+@@js frag
+function f() {
+    
+@@py
+def f(arg1, arg2 = False):
+	#function code
+@@js
+function f(arg1, arg2 = false) {
+    // function code
+}
+@@py
+def function():
+@@js frag
+function my_function() {
+@@py
+def get_entity_type_in_direction(dir):
+    move(dir)
+    return get_entity_type()
+
+def zero_arg_wrapper():
+    return get_entity_type_in_direction(North)
+handle = spawn_drone(zero_arg_wrapper)
+print(wait_for(handle))
+@@js
+function get_entity_type_in_direction(dir) {
+    move(dir);
+    return get_entity_type();
+}
+
+function zero_arg_wrapper() {
+    return get_entity_type_in_direction(North);
+}
+let handle = spawn_drone(zero_arg_wrapper);
+print(wait_for(handle));
+@@py
+def harvest_column(message):
+    for _ in range(get_world_size()):
+        harvest()
+        move(North)
+    print(message)
+
+i = 0
+while True:
+    if spawn_drone(harvest_column, i):
+        move(East)
+        i = (i + 1) % 10
+@@js
+function harvest_column(message) {
+    for (const _ of range(get_world_size())) {
+        harvest();
+        move(North);
+    }
+    print(message);
+}
+
+let i = 0;
+while (true) {
+    if (spawn_drone(harvest_column, i)) {
+        move(East);
+        i = (i + 1) % 10;
+    }
+}
+@@py
+def random_elem(list):
+	index = random() * len(list) // 1
+	return list[index]
+@@js
+function random_elem(list) {
+    let index = Math.floor(random() * len(list));
+    return list[index];
+}
+@@py
+dict(dictionary = None)
+@@js frag
+dict(dictionary = null)
+@@py
+do_something()
+
+print(get_tick_count())
+@@js
+do_something();
+
+print(get_tick_count());
+@@py
+drone = spawn_drone(function)
+while not has_finished(drone):
+    do_something_else()
+result = wait_for(drone)
+@@js
+let drone = spawn_drone(task);
+while (!has_finished(drone)) {
+    do_something_else();
+}
+let result = wait_for(drone);
+@@py
+elif
+@@js frag
+else if
+@@py
+else:
+    if condition:
+@@js frag
+else {
+    if (condition) {
+@@py
+filename = "f1"
+@@js
+let filename = "f1"
+@@py
+filename = "f1"
+sim_unlocks = Unlocks
+sim_items = {Items.Carrot : 10000, Items.Hay : 50}
+sim_globals = {"a" : 13}
+seed = 0
+speedup = 64
+
+run_time = simulate(filename, sim_unlocks, sim_items, sim_globals, seed, speedup)
+@@js
+let filename = "f1";
+let sim_unlocks = Unlocks;
+let sim_items = {[Items.Carrot]: 10000, [Items.Hay]: 50};
+let sim_globals = {"a": 13};
+let seed = 0;
+let speedup = 64;
+
+let run_time = simulate(filename, sim_unlocks, sim_items, sim_globals, seed, speedup);
+@@py
+for elem in set:
+@@js frag
+for (const elem of my_set) {
+@@py
+for i in range(10):
+    print(i)
+
+for i in range(2,6):
+    print(i)
+
+for i in range(10, 0, -1):
+    print(i)
+@@js
+for (const i of range(10)) {
+    print(i);
+}
+
+for (const i of range(2,6)) {
+    print(i);
+}
+
+for (const i of range(10, 0, -1)) {
+    print(i);
+}
+@@py
+for i in range(5):
+@@js frag
+for (const i of range(5)) {
+@@py
+for i in range(get_world_size()):
+@@js frag
+for (const i of range(get_world_size())) {
+@@py
+for i in range(get_world_size()):
+    move(North)
+@@js
+for (const i of range(get_world_size())) {
+    move(North);
+}
+@@py
+for i in range(len(list)):
+    list[i] += 1
+@@js
+for (const i of range(len(list))) {
+    list[i] += 1;
+}
+@@py
+for i in sequence:
+	#do something with i
+@@js
+for (const i of sequence) {
+    // do something with i
+}
+@@py
+for n in range(3):
+@@js frag
+for (const n of range(3)) {
+@@py
+for variable_name in sequence:
+	#code block
+@@js
+for (const variable_name of sequence) {
+    // code block
+}
+@@py
+from __builtins__ import *
+@@js
+import * from "__builtins__"
+@@py
+from a import *
+@@js
+import * from "a"
+@@py
+from a import *
+def f():
+    print(x)
+@@js
+import * from "a";
+function f() {
+    print(x);
+}
+@@py
+from b import *
+@@js
+import * from "b"
+@@py
+from b import *
+x = 0
+@@js
+import * from "b";
+let x = 0;
+@@py
+from file import
+@@js frag
+import { ... } from "file"
+@@py
+from module2 import *
+print_x()
+@@js
+import * from "module2";
+print_x();
+@@py
+from module2 import print_x
+print_x()
+@@js
+import { print_x } from "module2";
+print_x();
+@@py
+from x import *
+@@js
+import * from "x"
+@@py
+function = create_new_function_object()
+@@js
+my_function = create_new_function_object()
+@@py
+get_entity_type(direction = None)
+@@js frag
+get_entity_type(direction = null)
+@@py
+get_ground_type(direction = None)
+@@js frag
+get_ground_type(direction = null)
+@@py
+global
+@@js frag
+let
+@@py
+global x
+@@js
+x = 1
+@@py
+global x
+x += 1
+@@js
+x += 1
+@@py
+height = get_hover()
+@@js
+let height = get_hover()
+@@py
+if True:
+@@js frag
+if (true) {
+@@py
+if __name__ == "__main__":
+@@js frag
+if (__name__ == "__main__") {
+@@py
+if can_harvest():
+    harvest()
+@@js
+if (can_harvest()) {
+    harvest();
+}
+@@py
+if can_move(North):
+    move(North)
+@@js
+if (can_move(North)) {
+    move(North);
+}
+@@py
+if condition1:
+	#a
+elif condition2:
+	#b
+else:
+	#c
+@@js
+if (condition1) {
+    // a
+} else if (condition2) {
+    // b
+} else {
+    // c
+}
+@@py
+if condition1:
+	#a
+else:
+	if condition2:
+		#b
+	else:
+		#c
+@@js
+if (condition1) {
+    // a
+} else {
+    if (condition2) {
+        // b
+    } else {
+        // c
+    }
+}
+@@py
+if elem in set:
+@@js frag
+if (elem in my_set) {
+@@py
+if get_entity_type() == Entities.Grass:
+    harvest()
+@@js
+if (get_entity_type() == Entities.Grass) {
+    harvest();
+}
+@@py
+if get_entity_type() == Entities.Treasure:
+    harvest()
+@@js
+if (get_entity_type() == Entities.Treasure) {
+    harvest();
+}
+@@py
+if get_ground_type() != Grounds.Soil:
+    till()
+@@js
+if (get_ground_type() != Grounds.Soil) {
+    till();
+}
+@@py
+if get_ground_type() == Grounds.Clay:
+    plant(Entities.Rice)
+@@js
+if (get_ground_type() == Grounds.Clay) {
+    plant(Entities.Rice);
+}
+@@py
+if get_hardness() < 5:
+    dig()
+@@js
+if (get_hardness() < 5) {
+    dig();
+}
+@@py
+if get_pos_x() < 5 and num_items(Items.Wood) < 200:
+    plant(Entities.Bush)
+@@js
+if (get_pos_x() < 5 && num_items(Items.Wood) < 200) {
+    plant(Entities.Bush);
+}
+@@py
+if get_stability() > 3:
+    dig()
+@@js
+if (get_stability() > 3) {
+    dig();
+}
+@@py
+if get_water() < 0.5:
+    use_item(Items.Water)
+@@js
+if (get_water() < 0.5) {
+    use_item(Items.Water);
+}
+@@py
+if key in dict:
+@@js frag
+if (key in dict) {
+@@py
+if not can_harvest() and (1 + 1 == 4 / 2):
+    do_a_flip()
+@@js
+if (!can_harvest() && (1 + 1 == 4 / 2)) {
+    do_a_flip();
+}
+@@py
+if not spawn_drone(task):
+	task()
+@@js
+if (!spawn_drone(task)) {
+    task();
+}
+@@py
+if num_items(Items.Fertilizer) > 0:
+    use_item(Items.Fertilizer)
+@@js
+if (num_items(Items.Fertilizer) > 0) {
+    use_item(Items.Fertilizer);
+}
+@@py
+import a
+@@js
+import * as a from "a"
+@@py
+import a
+def f():
+    print(a.x)
+@@js
+import * as a from "a";
+function f() {
+    print(a.x);
+}
+@@py
+import b
+@@js
+import * as b from "b"
+@@py
+import b
+x = 0
+@@js
+import * as b from "b";
+let x = 0;
+@@py
+import file
+@@js
+import * as file from "file"
+@@py
+import module2
+@@js
+import * as module2 from "module2"
+@@py
+import other_file
+other_file.function()
+@@js
+import * as other_file from "other_file";
+other_file.my_function();
+@@py
+list = [1,2]
+list.insert(0, 0)
+@@js
+let list = [1,2];
+list.insert(0, 0);
+@@py
+list = [True, False, None]
+list.pop(0)
+@@js
+let list = [true, false, null];
+list.pop(0);
+@@py
+list = [True, False, None]
+list.remove(False)
+@@js
+let list = [true, false, null];
+list.remove(false);
+@@py
+list = []
+list.append(1)
+@@js
+let list = [];
+list.append(1);
+@@py
+list(collection = None)
+@@js frag
+list(collection = null)
+@@py
+max(*args)
+@@js frag
+max(...args)
+@@py
+measure(direction = None)
+@@js frag
+measure(direction = null)
+@@py
+min(*args)
+@@js frag
+min(...args)
+@@py
+new_dict = dict()
+@@js
+let new_dict = dict()
+@@py
+new_list = list((1,2,3))
+@@js
+let new_list = list([1,2,3])
+@@py
+new_set = set((1,2,3))
+@@js
+let new_set = set([1,2,3])
+@@py
+next_plant = Entities.Bush
+plant(next_plant)
+@@js
+let next_plant = Entities.Bush;
+plant(next_plant);
+@@py
+next_x, next_y = measure()
+@@js
+let [next_x, next_y] = measure()
+@@py
+not
+@@js frag
+!
+@@py
+not False
+@@js
+!false
+@@py
+not True
+@@js
+!true
+@@py
+not, and, or
+@@js frag
+!, &&, ||
+@@py
+num_petals = measure()
+@@js
+let num_petals = measure()
+@@py
+or
+@@js frag
+||
+@@py
+or 
+@@js frag
+|| 
+@@py
+pass
+@@js
+{}
+@@py
+passed_time = get_time()
+@@js
+let passed_time = get_time()
+@@py
+plant(Entities.Bush)
+n_substance = get_world_size() * num_unlocked(Unlocks.Mazes)
+use_item(Items.Weird_Substance, n_substance)
+@@js
+plant(Entities.Bush);
+let n_substance = get_world_size() * num_unlocked(Unlocks.Mazes);
+use_item(Items.Weird_Substance, n_substance);
+@@py
+plant(Entities.Bush)
+substance = get_world_size() * 2**(num_unlocked(Unlocks.Mazes) - 1)
+use_item(Items.Weird_Substance, substance)
+@@js
+plant(Entities.Bush);
+let substance = get_world_size() * 2**(num_unlocked(Unlocks.Mazes) - 1);
+use_item(Items.Weird_Substance, substance);
+@@py
+plant_type, (x, y) = get_companion()
+@@js
+let [plant_type, [x, y]] = get_companion()
+@@py
+plants = [Entities.Grass, Entities.Bush, Entities.Tree]
+
+for p in plants:
+    plant(p)
+    move(North)
+@@js
+let plants = [Entities.Grass, Entities.Bush, Entities.Tree];
+
+for (const p of plants) {
+    plant(p);
+    move(North);
+}
+@@py
+print(*args)
+@@js frag
+print(...args)
+@@py
+quick_print(*args)
+@@js frag
+quick_print(...args)
+@@py
+random_index = random() * len(list) // 1
+@@js
+let random_index = Math.floor(random() * len(list))
+@@py
+right_of = {North:East, East:South, South:West, West:North}
+@@js
+let right_of = {[North]: East, [East]: South, [South]: West, [West]: North}
+@@py
+run_time = simulate(filename, sim_unlocks, sim_items, sim_globals, seed, speedup)
+@@js
+let run_time = simulate(filename, sim_unlocks, sim_items, sim_globals, seed, speedup)
+@@py
+seed = 0
+@@js
+let seed = 0
+@@py
+set = {0}
+set.add(1)
+@@js
+let my_set = set([0]);
+my_set.add(1);
+@@py
+set = {North, East, West}
+@@js
+let my_set = set([North, East, West])
+@@py
+set(collection = None)
+@@js frag
+set(collection = null)
+@@py
+sim_globals = {"a" : 13}
+@@js
+let sim_globals = {"a": 13}
+@@py
+sim_items = {Items.Carrot : 10000, Items.Hay : 50}
+@@js
+let sim_items = {[Items.Carrot]: 10000, [Items.Hay]: 50}
+@@py
+sim_unlocks = Unlocks
+@@js
+let sim_unlocks = Unlocks
+@@py
+spawn_drone(function)
+@@js
+spawn_drone(task)
+@@py
+spawn_drone(function, *args)
+@@js frag
+spawn_drone(task, ...args)
+@@py
+speedup = 64
+@@js
+let speedup = 64
+@@py
+start = get_time()
+
+do_something()
+
+time_passed = get_time() - start
+@@js
+let start = get_time();
+
+do_something();
+
+let time_passed = get_time() - start;
+@@py
+string = str(1000)
+@@js
+let string = str(1000)
+@@py
+set_world_size(3)
+set_execution_speed(1)
+@@js
+set_world_size(3);
+set_execution_speed(1);
+@@py
+till()
+plant(Entities.Carrot)
+@@js
+till();
+plant(Entities.Carrot);
+@@py
+unlocks = Unlocks
+items = {Items.Cactus : 1000000000, Items.Power: 1000000000}
+globals = {}
+seed = -1
+simulate(filename, unlocks, items, globals, seed, speedup)
+@@js
+let unlocks = Unlocks;
+let items = {[Items.Cactus]: 1000000000, [Items.Power]: 1000000000};
+let globals = {};
+let seed = -1;
+simulate(filename, unlocks, items, globals, seed, speedup);
+@@py
+unlocks = Unlocks
+items = {Items.Power: 1000000000}
+globals = {}
+seed = -1
+simulate(filename, unlocks, items, globals, seed, speedup)
+@@js
+let unlocks = Unlocks;
+let items = {[Items.Power]: 1000000000};
+let globals = {};
+let seed = -1;
+simulate(filename, unlocks, items, globals, seed, speedup);
+@@py
+unlocks = Unlocks
+items = {Items.Weird_Substance : 1000000000, Items.Power: 1000000000}
+globals = {}
+seed = -1
+simulate(filename, unlocks, items, globals, seed, speedup)
+@@js
+let unlocks = Unlocks;
+let items = {[Items.Weird_Substance]: 1000000000, [Items.Power]: 1000000000};
+let globals = {};
+let seed = -1;
+simulate(filename, unlocks, items, globals, seed, speedup);
+@@py
+unlocks = {}
+items = {}
+globals = {}
+#a negative seed value means a random seed
+seed = -1
+simulate(filename, unlocks, items, globals, seed, speedup)
+@@js
+let unlocks = {};
+let items = {};
+let globals = {};
+// a negative seed value means a random seed
+let seed = -1;
+simulate(filename, unlocks, items, globals, seed, speedup);
+@@py
+value = dict[key]
+@@js
+let value = dict[key]
+@@py
+variable_name = value
+@@js
+let variable_name = value
+@@py
+while True:
+    do_a_flip()
+@@js
+while (true) {
+    do_a_flip();
+}
+@@py
+while True:
+    harvest()
+@@js
+while (true) {
+    harvest();
+}
+@@py
+while True:
+    if get_hardness() < 5:
+        dig()
+    else:
+        move(East)
+@@js
+while (true) {
+    if (get_hardness() < 5) {
+        dig();
+    } else {
+        move(East);
+    }
+}
+@@py
+while True:
+    pet_the_piggy()
+@@js
+while (true) {
+    pet_the_piggy();
+}
+@@py
+while condition:
+	#loop body
+@@js
+while (condition) {
+    // loop body
+}
+@@py
+while condition:
+	#loop body
+	#loop body
+	#...
+@@js
+while (condition) {
+    // loop body
+    // loop body
+    // ...
+}
+@@py
+while get_pos_z() < 100:
+    dig()
+@@js
+while (get_pos_z() < 100) {
+    dig();
+}
+@@py
+while num_drones() < max_drones():
+    spawn_drone(task)
+    move(East)
+@@js
+while (num_drones() < max_drones()) {
+    spawn_drone(task);
+    move(East);
+}
+@@py
+while prospect_iron() != None:
+    move(prospect_iron())
+@@js
+while (prospect_iron() != null) {
+    move(prospect_iron());
+}
+@@py
+x = 0
+@@js
+let x = 0
+@@py
+x == 5 or 6
+@@js
+x == 5 || 6
+@@py
+x, y = get_pos_x(), get_pos_y()
+@@js
+let [x, y] = [get_pos_x(), get_pos_y()]
+@@py
+x, y = measure()
+@@js
+let [x, y] = measure()
+@@py
+x, y, z = get_pos_x(), get_pos_y(), get_pos_z()
+@@js
+let [x, y, z] = [get_pos_x(), get_pos_y(), get_pos_z()]
+@@py
+{"x" : 42}
+@@js frag
+{"x": 42}
+@@py
+{Items.Hay : 100}
+@@js frag
+{[Items.Hay]: 100}

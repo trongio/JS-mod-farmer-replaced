@@ -1,0 +1,1955 @@
+# Docs code examples from the game text mapped to JavaScript. Exact match on the code after #CODE.
+@@py docs/first_program.md#0
+do_a_flip()
+harvest()
+harvest()
+@@js
+do_a_flip();
+harvest();
+harvest();
+@@py docs/scripting/break.md#0
+for i in range(10):
+	break
+print(i)
+@@js
+for (var i of range(10)) {
+    break;
+}
+print(i);
+@@py docs/scripting/break.md#1
+while True:
+	if can_harvest():
+		break
+harvest()
+@@js
+while (true) {
+    if (can_harvest()) {
+        break;
+    }
+}
+harvest();
+@@py docs/scripting/break.md#2
+while not can_harvest():
+	pass
+harvest()
+@@js
+while (!can_harvest()) {
+}
+harvest();
+@@py docs/scripting/break.md#3
+for i in range(10):
+	for j in range(10):
+		break
+		print("this is never printed")
+	print("this is printed 10 times")
+@@js
+for (const i of range(10)) {
+    for (const j of range(10)) {
+        break;
+        print("this is never printed");
+    }
+    print("this is printed 10 times");
+}
+@@py docs/scripting/comments.md#0
+#this is a comment
+#harvest()
+@@js
+//this is a comment
+//harvest();
+@@py docs/scripting/continue.md#0
+for i in range(10):
+	print("this happens every time")
+	continue
+	print("this is never printed")
+@@js
+for (const i of range(10)) {
+    print("this happens every time");
+    continue;
+    print("this is never printed");
+}
+@@py docs/scripting/continue.md#1
+while True:
+	if not can_harvest():
+		continue
+
+	harvest()
+@@js
+while (true) {
+    if (!can_harvest()) {
+        continue;
+    }
+
+    harvest();
+}
+@@py docs/scripting/continue.md#2
+while True:
+	if can_harvest():
+		harvest()
+@@js
+while (true) {
+    if (can_harvest()) {
+        harvest();
+    }
+}
+@@py docs/scripting/continue.md#3
+for i in range(2):
+	for j in range(2):
+		print("this is printed 4 times")
+		continue
+		print("this is never printed")
+	print("this is printed 2 times")
+@@js
+for (const i of range(2)) {
+    for (const j of range(2)) {
+        print("this is printed 4 times");
+        continue;
+        print("this is never printed");
+    }
+    print("this is printed 2 times");
+}
+@@py docs/scripting/debug.md#0
+print(0.24)
+@@js
+print(0.24);
+@@py docs/scripting/debug.md#1
+print(can_harvest())
+@@js
+print(can_harvest());
+@@py docs/scripting/debug.md#2
+print(get_pos_x(), get_pos_y())
+@@js
+print(get_pos_x(), get_pos_y());
+@@py docs/scripting/dicts.md#0
+right_of = {North:East, East:South, South:West, West:North}
+@@js
+let right_of = {[North]: East, [East]: South, [South]: West, [West]: North};
+@@py docs/scripting/dicts.md#1
+x, y = get_pos_x(), get_pos_y()
+entity_dict = {(x,y):get_entity_type()}
+@@js
+let [x, y] = [get_pos_x(), get_pos_y()];
+let entity_dict = {[str(x) + "," + str(y)]: get_entity_type()};
+@@py docs/scripting/dicts.md#2
+right_of = {North:East, East:South, South:West, West:North}
+print(right_of[South])
+@@js
+let right_of = {[North]: East, [East]: South, [South]: West, [West]: North};
+print(right_of[South]);
+@@py docs/scripting/dicts.md#3
+entity_dict = {}
+for _ in range(3):
+	entity_dict[(get_pos_x(), get_pos_y())] = get_entity_type()
+	move(East)
+print(entity_dict)
+@@js
+let entity_dict = {};
+for (const _ of range(3)) {
+    entity_dict[str(get_pos_x()) + "," + str(get_pos_y())] = get_entity_type();
+    move(East);
+}
+print(entity_dict);
+@@py docs/scripting/dicts.md#4
+right_of = {North:East, East:South, South:West, West:North}
+print(North in right_of)
+for key in right_of:
+	value = right_of[key]
+	print(key, ":", value)
+@@js
+let right_of = {[North]: East, [East]: South, [South]: West, [West]: North};
+print(North in right_of);
+for (const key of right_of) {
+    let value = right_of[key];
+    print(key, ":", value);
+}
+@@py docs/scripting/for.md#0
+for i in range(5):
+    harvest()
+@@js
+for (const i of range(5)) {
+    harvest();
+}
+@@py docs/scripting/for.md#1
+i = 0
+harvest()
+i = 1
+harvest()
+i = 2
+harvest()
+i = 3
+harvest()
+i = 4
+harvest()
+@@js
+let i = 0;
+harvest();
+i = 1;
+harvest();
+i = 2;
+harvest();
+i = 3;
+harvest();
+i = 4;
+harvest();
+@@py docs/scripting/functions.md#0
+def move_n_dir(n, dir):
+	for i in range(n):
+		move(dir)
+@@js
+function move_n_dir(n, dir) {
+    for (const i of range(n)) {
+        move(dir);
+    }
+}
+@@py docs/scripting/functions.md#1
+def move_n_dir(n, dir):
+	for i in range(n):
+		move(dir)
+
+move_n_dir(2, North)
+move_n_dir(2, East)
+@@js
+function move_n_dir(n, dir) {
+    for (const i of range(n)) {
+        move(dir);
+    }
+}
+
+move_n_dir(2, North);
+move_n_dir(2, East);
+@@py docs/scripting/functions.md#2
+func()
+def func():
+	pass
+@@js
+func();
+function func() {
+}
+@@py docs/scripting/functions.md#3
+def xor(a, b):
+	return a != b
+
+if xor(True, False):
+	do_a_flip()
+@@js
+function xor(a, b) {
+    return a != b;
+}
+
+if (xor(true, false)) {
+    do_a_flip();
+}
+@@py docs/scripting/functions.md#4
+def f(a = False):
+	if a:
+		do_a_flip()
+
+f()
+
+f(True)
+@@js
+function f(a = false) {
+    if (a) {
+        do_a_flip();
+    }
+}
+
+f();
+
+f(true);
+@@py docs/scripting/functions.md#5
+def f():
+	def d():
+		do_a_flip()
+	return d
+
+f()()
+@@js
+function f() {
+    function d() {
+        do_a_flip();
+    }
+    return d;
+}
+
+f()();
+@@py docs/scripting/functions.md#6
+def f(g, arg):
+	for _ in range(4):
+		g(arg)
+
+f(move, East)
+plant(Entities.Tree)
+f(use_item, Items.Fertilizer)
+@@js
+function f(g, arg) {
+    for (const _ of range(4)) {
+        g(arg);
+    }
+}
+
+f(move, East);
+plant(Entities.Tree);
+f(use_item, Items.Fertilizer);
+@@py docs/scripting/if.md#0
+condition1 = False
+condition2 = False
+condition3 = True
+
+if condition1:
+	do_a_flip()
+elif condition2:
+	harvest()
+else:
+	do_a_flip()
+	harvest()
+@@js
+let condition1 = false;
+let condition2 = false;
+let condition3 = true;
+
+if (condition1) {
+    do_a_flip();
+} else if (condition2) {
+    harvest();
+} else {
+    do_a_flip();
+    harvest();
+}
+@@py docs/scripting/if.md#1
+condition = True
+
+if condition:
+	do_a_flip()
+@@js
+let condition = true;
+
+if (condition) {
+    do_a_flip();
+}
+@@py docs/scripting/if.md#2
+condition = False
+
+if condition:
+	do_a_flip()
+else:
+	harvest()
+@@js
+let condition = false;
+
+if (condition) {
+    do_a_flip();
+} else {
+    harvest();
+}
+@@py docs/scripting/lists.md#0
+some_list = [2, True, Items.Hay]
+print(some_list)
+@@js
+let some_list = [2, true, Items.Hay];
+print(some_list);
+@@py docs/scripting/lists.md#1
+empty_list = []
+print(empty_list)
+@@js
+let empty_list = [];
+print(empty_list);
+@@py docs/scripting/lists.md#2
+entities = [Entities.Tree, Entities.Carrot, Entities.Pumpkin]
+plant(entities[1])
+@@js
+let entities = [Entities.Tree, Entities.Carrot, Entities.Pumpkin];
+plant(entities[1]);
+@@py docs/scripting/lists.md#3
+numbers = [4, 7, 2, 5]
+sum = 0
+for number in numbers:
+	sum += number
+print(sum)
+@@js
+let numbers = [4, 7, 2, 5];
+let sum = 0;
+for (const number of numbers) {
+    sum += number;
+}
+print(sum);
+@@py docs/scripting/lists.md#4
+numbers = [2, 6, 12]
+numbers.append(7)
+print(numbers)
+@@js
+let numbers = [2, 6, 12];
+numbers.append(7);
+print(numbers);
+@@py docs/scripting/lists.md#5
+numbers = [1, 2, 4, 2]
+numbers.remove(2)
+print(numbers)
+@@js
+let numbers = [1, 2, 4, 2];
+numbers.remove(2);
+print(numbers);
+@@py docs/scripting/lists.md#6
+some_list = [Entities.Tree, Items.Hay]
+some_list.insert(1, Items.Wood)
+print(some_list)
+@@js
+let some_list = [Entities.Tree, Items.Hay];
+some_list.insert(1, Items.Wood);
+print(some_list);
+@@py docs/scripting/lists.md#7
+numbers = [3, 5, 8, 25]
+numbers.pop()
+print(numbers)
+numbers.pop(1)
+print(numbers)
+@@js
+let numbers = [3, 5, 8, 25];
+numbers.pop();
+print(numbers);
+numbers.pop(1);
+print(numbers);
+@@py docs/scripting/lists.md#8
+numbers = [3, 5, 8, 25]
+print(len(numbers))
+@@js
+let numbers = [3, 5, 8, 25];
+print(len(numbers));
+@@py docs/scripting/lists.md#9
+a = [1, 2]
+b = a
+b.pop()
+print(a)
+print(b)
+@@js
+let a = [1, 2];
+let b = a;
+b.pop();
+print(a);
+print(b);
+@@py docs/scripting/operators.md#0
+2 + 3
+@@js
+2 + 3
+@@py docs/scripting/operators.md#1
+3 - 2
+@@js
+3 - 2
+@@py docs/scripting/operators.md#2
+2 * 3
+@@js
+2 * 3
+@@py docs/scripting/operators.md#3
+5 / 2
+@@js
+5 / 2
+@@py docs/scripting/operators.md#4
+5 // 2
+@@js
+Math.floor(5 / 2)
+@@py docs/scripting/operators.md#5
+4 % 2
+@@js
+4 % 2
+@@py docs/scripting/operators.md#6
+5 % 2
+@@js
+5 % 2
+@@py docs/scripting/operators.md#7
+6 % 2
+@@js
+6 % 2
+@@py docs/scripting/operators.md#8
+2 % 6
+@@js
+2 % 6
+@@py docs/scripting/operators.md#9
+1.5 % 1
+@@js
+1.5 % 1
+@@py docs/scripting/operators.md#10
+2**2
+@@js
+2**2
+@@py docs/scripting/operators.md#11
+(-5)**3
+@@js
+(-5)**3
+@@py docs/scripting/operators.md#12
+2 == 2
+@@js
+2 == 2
+@@py docs/scripting/operators.md#13
+Entities.Bush != Entities.Bush
+@@js
+Entities.Bush != Entities.Bush
+@@py docs/scripting/operators.md#14
+3 != 3 + 1
+@@js
+3 != 3 + 1
+@@py docs/scripting/operators.md#15
+1 <= 1
+@@js
+1 <= 1
+@@py docs/scripting/operators.md#16
+2 >= 3
+@@js
+2 >= 3
+@@py docs/scripting/operators.md#17
+-2 < -1
+@@js
+-2 < -1
+@@py docs/scripting/operators.md#18
+6 > 6
+@@js
+6 > 6
+@@py docs/scripting/operators.md#19
+not False
+@@js
+!false
+@@py docs/scripting/operators.md#20
+not True
+@@js
+!true
+@@py docs/scripting/operators.md#21
+True and True
+@@js
+true && true
+@@py docs/scripting/operators.md#22
+True and False
+@@js
+true && false
+@@py docs/scripting/operators.md#23
+False and False
+@@js
+false && false
+@@py docs/scripting/operators.md#24
+True or True
+@@js
+true || true
+@@py docs/scripting/operators.md#25
+True or False
+@@js
+true || false
+@@py docs/scripting/operators.md#26
+False or False
+@@js
+false || false
+@@py docs/scripting/operators.md#27
+(4 % 2 == 1 or 4 % 2 == 0) and 2 + 3 > 4
+@@js
+(4 % 2 == 1 || 4 % 2 == 0) && 2 + 3 > 4
+@@py docs/scripting/scopes.md#0
+x = 0
+
+def f():
+    x = 1
+f()
+print(x)
+@@js
+let x = 0;
+
+function f() {
+    let x = 1;
+}
+f();
+print(x);
+@@py docs/scripting/scopes.md#1
+x = 0
+
+def f():
+    global x
+    x = 1
+f()
+print(x)
+@@js
+let x = 0;
+
+function f() {
+    x = 1;
+}
+f();
+print(x);
+@@py docs/scripting/scopes.md#2
+for i in range(3):
+    pass
+print(i)
+@@js
+for (var i of range(3)) {
+}
+print(i);
+@@py docs/scripting/sets.md#0
+my_set = set()
+print(my_set)
+my_set.add(1)
+my_set.add(North)
+print(my_set)
+my_set.remove(North)
+print(my_set)
+if North in my_set:
+    print("North is in set")
+else:
+    print("North is not in set")
+for element in my_set:
+    print(element)
+@@js
+let my_set = set();
+print(my_set);
+my_set.add(1);
+my_set.add(North);
+print(my_set);
+my_set.remove(North);
+print(my_set);
+if (North in my_set) {
+    print("North is in set");
+} else {
+    print("North is not in set");
+}
+for (const element of my_set) {
+    print(element);
+}
+@@py docs/scripting/tuples.md#0
+tuple = 1, 2
+print(tuple)
+@@js
+let pair = [1, 2];
+print(pair);
+@@py docs/scripting/tuples.md#1
+a, b = 1, 2
+print(a)
+a, b = b, a
+print(a)
+@@js
+let [a, b] = [1, 2];
+print(a);
+[a, b] = [b, a];
+print(a);
+@@py docs/scripting/tuples.md#2
+tuple = 1, 2
+print(tuple[1])
+
+tuple[0] = 3
+@@js
+plant(Entities.Bush);
+let companion = get_companion();
+print(companion[1]);
+
+// What the game returns can't be changed, so this is an error
+companion[0] = 3;
+@@py docs/scripting/tuples.md#3
+d = {(1,2):(4,5)}
+
+print(d[(1,2)])
+@@js
+let d = {"1,2": [4, 5]};
+
+print(d["1,2"]);
+@@py docs/scripting/tuples.md#4
+def f():
+    return 1, 2
+
+a, b = f()
+@@js
+function f() {
+    return [1, 2];
+}
+
+let [a, b] = f();
+@@py docs/scripting/variables.md#0
+a = 5
+for i in range(a):
+	do_a_flip()
+@@js
+let a = 5;
+for (const i of range(a)) {
+    do_a_flip();
+}
+@@py docs/scripting/variables.md#1
+a = 5
+i = 0
+while i < a:
+	do_a_flip()
+	i = i + 1
+@@js
+let a = 5;
+let i = 0;
+while (i < a) {
+    do_a_flip();
+    i = i + 1;
+}
+@@py docs/scripting/while.md#0
+harvest()
+harvest()
+harvest()
+@@js
+harvest();
+harvest();
+harvest();
+@@py docs/scripting/while.md#1
+while False:
+	do_a_flip()
+@@js
+while (false) {
+    do_a_flip();
+}
+@@py docs/scripting/while.md#2
+while True:
+	do_a_flip()
+@@js
+while (true) {
+    do_a_flip();
+}
+@@py docs/scripting/while.md#3
+while True:
+	do_a_flip()
+	pet_the_piggy()
+harvest()
+@@js
+while (true) {
+    do_a_flip();
+    pet_the_piggy();
+}
+harvest();
+@@py docs/unlocks/auto_unlock.md#0
+for _ in range(6):
+    harvest()
+    unlock(Unlocks.Grass)
+@@js
+for (const _ of range(6)) {
+    harvest();
+    unlock(Unlocks.Grass);
+}
+@@py docs/unlocks/auto_unlock.md#1
+print(get_cost(Unlocks.Loops))
+@@js
+print(get_cost(Unlocks.Loops));
+@@py docs/unlocks/bamboo.md#0
+till()
+plant(Entities.Bamboo)
+move(East) # move away so the bamboo can grow
+@@js
+till();
+plant(Entities.Bamboo);
+move(East); // move away so the bamboo can grow
+@@py docs/unlocks/bamboo.md#1
+till()
+plant(Entities.Bamboo)
+hover(measure()) # hover such that drone will be next to fruit
+
+move(East) # move away and wait for it to grow
+for i in range(3):
+    do_a_flip()
+
+move(West) # pluck fruit
+move(East) # move away again
+@@js
+till();
+plant(Entities.Bamboo);
+hover(measure()); // hover such that drone will be next to fruit
+
+move(East); // move away and wait for it to grow
+for (const i of range(3)) {
+    do_a_flip();
+}
+
+move(West); // pluck fruit
+move(East); // move away again
+@@py docs/unlocks/cactus.md#0
+swap(North)
+swap(East)
+swap(South)
+swap(West)
+harvest()
+@@js
+swap(North);
+swap(East);
+swap(South);
+swap(West);
+harvest();
+@@py docs/unlocks/cactus.md#1
+for _ in range(9):
+    till()
+    plant(Entities.Cactus)
+    move(East)
+sorted = False
+while not sorted:
+    sorted = True
+    for _ in range(9):
+        move(East)
+        if get_pos_x() > 0 and measure(West) > measure():
+            swap(West)
+            sorted = False
+harvest()
+@@js
+for (const _ of range(9)) {
+    till();
+    plant(Entities.Cactus);
+    move(East);
+}
+let sorted = false;
+while (!sorted) {
+    sorted = true;
+    for (const _ of range(9)) {
+        move(East);
+        if (get_pos_x() > 0 && measure(West) > measure()) {
+            swap(West);
+            sorted = false;
+        }
+    }
+}
+harvest();
+@@py docs/unlocks/carrots.md#0
+till()
+plant(Entities.Carrot)
+for _ in range(8):
+    do_a_flip()
+harvest()
+till()
+@@js
+till();
+plant(Entities.Carrot);
+for (const _ of range(8)) {
+    do_a_flip();
+}
+harvest();
+till();
+@@py docs/unlocks/coal.md#0
+# Dig until coal block appears
+while get_ground_type() != Grounds.Coal:
+    dig()
+
+# Mine the coal
+dig()
+@@js
+// Dig until coal block appears
+while (get_ground_type() != Grounds.Coal) {
+    dig();
+}
+
+// Mine the coal
+dig();
+@@py docs/unlocks/costs.md#0
+print(get_cost(Entities.Pumpkin))
+@@js
+print(get_cost(Entities.Pumpkin));
+@@py docs/unlocks/costs.md#1
+print(get_cost(Unlocks.Loops, 0))
+print(get_cost(Unlocks.Loops, 1))
+@@js
+print(get_cost(Unlocks.Loops, 0));
+print(get_cost(Unlocks.Loops, 1));
+@@py docs/unlocks/costs.md#2
+cost = get_cost(Entities.Carrot)
+for item in cost:
+	if num_items(item) < cost[item]:
+		print("missing", cost[item] - num_items(item), item)
+@@js
+let cost = get_cost(Entities.Carrot);
+for (const item of cost) {
+    if (num_items(item) < cost[item]) {
+        print("missing", cost[item] - num_items(item), item);
+    }
+}
+@@py docs/unlocks/debug_place.md#0
+place(Grounds.Block_Green)
+move(East)
+
+place(Grounds.Block_Blue)
+move(East)
+
+place(Grounds.Block_Green)
+move(North)
+
+place(Grounds.Block_Blue)
+move(North)
+
+place(Grounds.Block_Green)
+move(West)
+
+place(Grounds.Block_Blue)
+move(West)
+
+place(Grounds.Block_Green)
+move(South)
+
+place(Grounds.Block_Blue)
+move(East)
+
+place(Grounds.Block_Red)
+place(Grounds.Block_Red)
+
+do_a_flip()
+@@js
+place(Grounds.Block_Green);
+move(East);
+place(Grounds.Block_Blue);
+move(East);
+
+place(Grounds.Block_Green);
+move(North);
+
+place(Grounds.Block_Blue);
+move(North);
+
+place(Grounds.Block_Green);
+move(West);
+
+place(Grounds.Block_Blue);
+move(West);
+
+place(Grounds.Block_Green);
+move(South);
+
+place(Grounds.Block_Blue);
+move(East);
+
+place(Grounds.Block_Red);
+place(Grounds.Block_Red);
+
+do_a_flip();
+@@py docs/unlocks/dinosaurs.md#0
+change_hat(Hats.Dinosaur_Hat)
+while True:
+    next_x, next_y = measure()
+    while get_pos_x() != next_x:
+        move(East)
+    while get_pos_y() != next_y:
+        move(North)
+@@js
+change_hat(Hats.Dinosaur_Hat);
+while (true) {
+    let [next_x, next_y] = measure();
+    while (get_pos_x() != next_x) {
+        move(East);
+    }
+    while (get_pos_y() != next_y) {
+        move(North);
+    }
+}
+@@py docs/unlocks/dinosaurs.md#1
+ticks = 400
+for i in range(100):
+    quick_print("ticks after ", i, " apples: ", ticks)
+    ticks -= ticks * 0.03 // 1
+@@js
+let ticks = 400;
+for (const i of range(100)) {
+    quick_print("ticks after ", i, " apples: ", ticks);
+    ticks -= Math.floor(ticks * 0.03);
+}
+@@py docs/unlocks/dynamite.md#0
+# Dig down to the soot layer, through the dynamite layer above
+while get_ground_type() != Grounds.Soot:
+    dig()
+
+# List of directions that make the drone move in a circle
+circle_directions = [
+    East, South, West, West, 
+    North, North, East, East
+]
+for dir in circle_directions:
+    move(dir)
+    dig()
+    print(measure()) # The number on the soot block
+@@js
+// Dig down to the soot layer, through the dynamite layer above
+while (get_ground_type() != Grounds.Soot) {
+    dig();
+}
+
+// List of directions that make the drone move in a circle
+let circle_directions = [
+    East, South, West, West, 
+    North, North, East, East
+];
+for (const dir of circle_directions) {
+    move(dir);
+    dig();
+    print(measure()); // The number on the soot block
+}
+@@py docs/unlocks/dynamite.md#1
+while get_ground_type() != Grounds.Soot:
+    dig()
+
+circle_directions = [
+    East, South, West, West, North,
+    North, East, East, South, West
+]
+# Go around the block we initially dug into
+for dir in circle_directions:
+    # If the soot measures 0,
+    # we know all surrounding dynamite blocks are duds
+    if get_ground_type() == Grounds.Soot and measure() == 0:
+        # Do another circle through the surrounding blocks
+        for dir2 in circle_directions:
+            move(dir2)
+            # Dig up the dynamite dud block
+            while get_ground_type() != Grounds.Soot:
+                dig()
+    move(dir)
+@@js
+while (get_ground_type() != Grounds.Soot) {
+    dig();
+}
+
+let circle_directions = [
+    East, South, West, West, North,
+    North, East, East, South, West
+];
+// Go around the block we initially dug into
+for (const dir of circle_directions) {
+    // If the soot measures 0,
+    // we know all surrounding dynamite blocks are duds
+    if (get_ground_type() == Grounds.Soot && measure() == 0) {
+        // Do another circle through the surrounding blocks
+        for (const dir2 of circle_directions) {
+            move(dir2);
+            // Dig up the dynamite dud block
+            while (get_ground_type() != Grounds.Soot) {
+                dig();
+            }
+        }
+    }
+    move(dir);
+}
+@@py docs/unlocks/expand_1.md#0
+while True:
+	move(North)
+@@js
+while (true) {
+    move(North);
+}
+@@py docs/unlocks/expand_2.md#0
+for i in range(5):
+	do_a_flip()
+@@js
+for (const i of range(5)) {
+    do_a_flip();
+}
+@@py docs/unlocks/expand_2.md#1
+for i in range(get_world_size()):
+	harvest()
+	move(North)
+@@js
+for (const i of range(get_world_size())) {
+    harvest();
+    move(North);
+}
+@@py docs/unlocks/expand_2.md#2
+for i in range(get_world_size()):
+	for j in range(get_world_size()):
+		#do a flip on every tile
+		do_a_flip()
+		move(North)
+	move(East)
+@@js
+for (const i of range(get_world_size())) {
+    for (const j of range(get_world_size())) {
+        //do a flip on every tile
+        do_a_flip();
+        move(North);
+    }
+    move(East);
+}
+@@py docs/unlocks/fertilizer.md#0
+plant(Entities.Tree)
+use_item(Items.Fertilizer)
+use_item(Items.Fertilizer)
+use_item(Items.Fertilizer)
+harvest()
+@@js
+plant(Entities.Tree);
+use_item(Items.Fertilizer);
+use_item(Items.Fertilizer);
+use_item(Items.Fertilizer);
+harvest();
+@@py docs/unlocks/fertilizer.md#1
+for _ in range(6):
+    use_item(Items.Weird_Substance)
+    move(East)
+@@js
+for (const _ of range(6)) {
+    use_item(Items.Weird_Substance);
+    move(East);
+}
+@@py docs/unlocks/hats.md#0
+change_hat(Hats.Gray_Hat)
+do_a_flip()
+change_hat(Hats.Purple_Hat)
+do_a_flip()
+change_hat(Hats.Green_Hat)
+do_a_flip()
+change_hat(Hats.Brown_Hat)
+do_a_flip()
+@@js
+change_hat(Hats.Gray_Hat);
+do_a_flip();
+change_hat(Hats.Purple_Hat);
+do_a_flip();
+change_hat(Hats.Green_Hat);
+do_a_flip();
+change_hat(Hats.Brown_Hat);
+do_a_flip();
+@@py docs/unlocks/iron.md#0
+# Dig until an iron block appears
+while get_ground_type() != Grounds.Iron:
+    dig()
+
+# Mine the iron
+dig()
+@@js
+// Dig until an iron block appears
+while (get_ground_type() != Grounds.Iron) {
+    dig();
+}
+
+// Mine the iron
+dig();
+@@py docs/unlocks/jump.md#0
+# Jump close to the rice resource
+jump(Unlocks.Rice)
+
+# Plant a row of rice terraces
+for i in range(get_world_size()):
+    # Jump is not exact, dig away the last blocks
+    while get_ground_type() != Grounds.Clay:
+        dig()
+
+    plant(Entities.Rice)
+
+    move(East)
+@@js
+// Jump close to the rice resource
+jump(Unlocks.Rice);
+
+// Plant a row of rice terraces
+for (const i of range(get_world_size())) {
+    // Jump is not exact, dig away the last blocks
+    while (get_ground_type() != Grounds.Clay) {
+        dig();
+    }
+
+    plant(Entities.Rice);
+
+    move(East);
+}
+@@py docs/unlocks/mazes.md#0
+plant(Entities.Bush)
+size = get_world_size()
+substance = size * 2**(num_unlocked(Unlocks.Mazes) - 1)
+use_item(Items.Weird_Substance, substance)
+@@js
+plant(Entities.Bush);
+let size = get_world_size();
+let substance = size * 2**(num_unlocked(Unlocks.Mazes) - 1);
+use_item(Items.Weird_Substance, substance);
+@@py docs/unlocks/mazes.md#1
+quick_print(
+    can_move(North), 
+    can_move(East), 
+    can_move(South), 
+    can_move(West)
+)
+if move(North) and get_entity_type() == Entities.Treasure:
+    harvest()
+@@js
+quick_print(
+    can_move(North), 
+    can_move(East), 
+    can_move(South), 
+    can_move(West)
+);
+if (move(North) && get_entity_type() == Entities.Treasure) {
+    harvest();
+}
+@@py docs/unlocks/mazes.md#2
+directions = [North, East, South, West]
+index = 0
+while get_entity_type() != Entities.Treasure:
+    index = (index - 1) % 4
+    for _ in range(4):
+        if move(directions[index]):
+            break
+        index = (index + 1) % 4
+do_a_flip()
+harvest()
+@@js
+let directions = [North, East, South, West];
+let index = 0;
+while (get_entity_type() != Entities.Treasure) {
+    index = (index - 1) % 4;
+    for (const _ of range(4)) {
+        if (move(directions[index])) {
+            break;
+        }
+        index = (index + 1) % 4;
+    }
+}
+do_a_flip();
+harvest();
+@@py docs/unlocks/mazes.md#3
+directions = [North, East, South, West]
+index = 0
+move(directions[index])
+
+#turn right
+index = (index + 1) % 4
+move(directions[index])
+
+#turn left
+index = (index - 1) % 4
+move(directions[index])
+@@js
+let directions = [North, East, South, West];
+let index = 0;
+move(directions[index]);
+
+//turn right
+index = (index + 1) % 4;
+move(directions[index]);
+
+//turn left
+index = (index - 1) % 4;
+move(directions[index]);
+@@py docs/unlocks/megafarm.md#0
+def harvest_spiral(radius):
+    for i in range(1, radius, 2):
+        harvest()
+        move(West)
+        for j in range(i):
+            harvest()
+            move(South)
+        for j in range(i+1):
+            harvest()
+            move(East)
+        for j in range(i+1):
+            harvest()
+            move(North)
+        for j in range(i+1):
+            harvest()
+            move(West)
+
+while True:
+    spawn_drone(harvest_spiral, 7)
+    do_a_flip()
+@@js
+function harvest_spiral(radius) {
+    for (const i of range(1, radius, 2)) {
+        harvest();
+        move(West);
+        for (const j of range(i)) {
+            harvest();
+            move(South);
+        }
+        for (const j of range(i+1)) {
+            harvest();
+            move(East);
+        }
+        for (const j of range(i+1)) {
+            harvest();
+            move(North);
+        }
+        for (const j of range(i+1)) {
+            harvest();
+            move(West);
+        }
+    }
+}
+
+while (true) {
+    spawn_drone(harvest_spiral, 7);
+    do_a_flip();
+}
+@@py docs/unlocks/megafarm.md#1
+def drone_function():
+    move(East)
+    do_a_flip()
+
+spawn_drone(drone_function)
+do_a_flip()
+@@js
+function drone_function() {
+    move(East);
+    do_a_flip();
+}
+
+spawn_drone(drone_function);
+do_a_flip();
+@@py docs/unlocks/megafarm.md#2
+def harvest_column():
+    for _ in range(get_world_size()):
+        harvest()
+        move(North)
+
+while True:
+    if spawn_drone(harvest_column):
+        move(East)
+@@js
+function harvest_column() {
+    for (const _ of range(get_world_size())) {
+        harvest();
+        move(North);
+    }
+}
+
+while (true) {
+    if (spawn_drone(harvest_column)) {
+        move(East);
+    }
+}
+@@py docs/unlocks/megafarm.md#3
+for dir in [North, East, South, West]:
+    def task():
+        move(dir)
+        do_a_flip()
+    spawn_drone(task)
+@@js
+for (const dir of [North, East, South, West]) {
+    function task() {
+        move(dir);
+        do_a_flip();
+    }
+    spawn_drone(task);
+}
+@@py docs/unlocks/megafarm.md#4
+def for_all(f):
+	def row():
+		for _ in range(get_world_size()-1):
+			f()
+			move(East)
+		f()
+	for _ in range(get_world_size()):
+		if not spawn_drone(row):
+			row()
+		move(North)
+
+for_all(harvest)
+@@js
+function for_all(f) {
+    function row() {
+        for (const _ of range(get_world_size()-1)) {
+            f();
+            move(East);
+        }
+        f();
+    }
+    for (const _ of range(get_world_size())) {
+        if (!spawn_drone(row)) {
+            row();
+        }
+        move(North);
+    }
+}
+
+for_all(harvest);
+@@py docs/unlocks/megafarm.md#5
+def get_entity_type_in_direction(dir):
+    move(dir)
+    return get_entity_type()
+
+drone = spawn_drone(get_entity_type_in_direction, East)
+print(wait_for(drone))
+@@js
+function get_entity_type_in_direction(dir) {
+    move(dir);
+    return get_entity_type();
+}
+
+let drone = spawn_drone(get_entity_type_in_direction, East);
+print(wait_for(drone));
+@@py docs/unlocks/megafarm.md#6
+x = 0
+
+def increment():
+    global x
+    x += 1
+
+wait_for(spawn_drone(increment))
+print(x)
+@@js
+let x = 0;
+
+function increment() {
+    x += 1;
+}
+
+wait_for(spawn_drone(increment));
+print(x);
+@@py docs/unlocks/megafarm.md#7
+def modify(list):
+	list.append('green')
+	print(list)
+
+l = ['red']
+wait_for(spawn_drone(modify, l))
+print(l)
+@@js
+function modify(list) {
+    list.append('green');
+    print(list);
+}
+
+let l = ['red'];
+wait_for(spawn_drone(modify, l));
+print(l);
+@@py docs/unlocks/mining.md#0
+dig()
+do_a_flip()
+dig()
+do_a_flip()
+dig()
+do_a_flip()
+clear()
+@@js
+dig();
+do_a_flip();
+dig();
+do_a_flip();
+dig();
+do_a_flip();
+clear();
+@@py docs/unlocks/mushroom.md#0
+# Process a row of mushrooms
+for i in range(get_world_size()):
+    # Dig down to the top mushroom block
+    while get_ground_type() != Grounds.Mushroom:
+        dig()
+
+    # Print the mushroom type number
+    print(measure())
+
+    move(East)
+@@js
+// Process a row of mushrooms
+for (const i of range(get_world_size())) {
+    // Dig down to the top mushroom block
+    while (get_ground_type() != Grounds.Mushroom) {
+        dig();
+    }
+
+    // Print the mushroom type number
+    print(measure());
+
+    move(East);
+}
+@@py docs/unlocks/mushroom.md#1
+while get_ground_type() != Grounds.Mushroom:
+    dig()
+
+depth = get_pos_z()
+for i in range(2):
+    # Make space to push the mushroom block east
+    move(East)
+    while get_pos_z() > depth - 1:
+        dig()
+    # Move back, push, and follow the pushed block
+    move(West)
+    push(East) # Push the mushroom!
+    move(East)
+@@js
+while (get_ground_type() != Grounds.Mushroom) {
+    dig();
+}
+
+let depth = get_pos_z();
+for (const i of range(2)) {
+    // Make space to push the mushroom block east
+    move(East);
+    while (get_pos_z() > depth - 1) {
+        dig();
+    }
+    // Move back, push, and follow the pushed block
+    move(West);
+    push(East); // Push the mushroom!
+    move(East);
+}
+@@py docs/unlocks/petrified_pumpkins.md#0
+while get_ground_type() != Grounds.Petrified_Pumpkin:
+    dig()
+z = get_pos_z()
+for i in range(get_world_size()):
+    for j in range(get_world_size()):
+        while get_pos_z() > z - 2 and get_ground_type() != Grounds.Petrified_Pumpkin:
+            dig()
+        move(North)
+    move(East)
+for _ in range(3):
+    dig()
+    move(East)
+    dig()
+    move(South)
+    dig()
+    move(West)
+    dig()
+    move(West)
+    dig()
+    move(North)
+    dig()
+    move(North)
+    dig()
+    move(East)
+    dig()
+    move(East)
+    dig()
+    move(South)
+    move(West)
+@@js
+while (get_ground_type() != Grounds.Petrified_Pumpkin) {
+    dig();
+}
+let z = get_pos_z();
+for (const i of range(get_world_size())) {
+    for (const j of range(get_world_size())) {
+        while (get_pos_z() > z - 2 && get_ground_type() != Grounds.Petrified_Pumpkin) {
+            dig();
+        }
+        move(North);
+    }
+    move(East);
+}
+for (const _ of range(3)) {
+    dig();
+    move(East);
+    dig();
+    move(South);
+    dig();
+    move(West);
+    dig();
+    move(West);
+    dig();
+    move(North);
+    dig();
+    move(North);
+    dig();
+    move(East);
+    dig();
+    move(East);
+    dig();
+    move(South);
+    move(West);
+}
+@@py docs/unlocks/plant.md#0
+plant(Entities.Bush)
+@@js
+plant(Entities.Bush);
+@@py docs/unlocks/polyculture.md#0
+plant(Entities.Bush)
+plant_type, (x, y) = get_companion()
+print(plant_type, (x, y))
+move(East)
+move(South)
+plant(plant_type)
+move(West)
+move(North)
+do_a_flip()
+harvest()
+@@js
+plant(Entities.Bush);
+let [plant_type, [x, y]] = get_companion();
+print(plant_type, [x, y]);
+move(East);
+move(South);
+plant(plant_type);
+move(West);
+move(North);
+do_a_flip();
+harvest();
+@@py docs/unlocks/prospecting.md#0
+# Make sure prospect returns a direction
+if prospect_iron() != None:
+    move(prospect_iron()) # Move closer to the iron vein
+@@js
+// Make sure prospect returns a direction
+if (prospect_iron() != null) {
+    move(prospect_iron()); // Move closer to the iron vein
+}
+@@py docs/unlocks/pumpkins.md#0
+for i in range(get_world_size()):
+	for j in range(get_world_size()):
+		till()
+		plant(Entities.Pumpkin)
+		move(North)
+	move(East)
+do_a_flip()
+do_a_flip()
+move(North)
+move(North)
+plant(Entities.Pumpkin)
+do_a_flip()
+plant(Entities.Pumpkin)
+do_a_flip()
+do_a_flip()
+do_a_flip()
+do_a_flip()
+harvest()
+@@js
+for (const i of range(get_world_size())) {
+    for (const j of range(get_world_size())) {
+        till();
+        plant(Entities.Pumpkin);
+        move(North);
+    }
+    move(East);
+}
+do_a_flip();
+do_a_flip();
+move(North);
+move(North);
+plant(Entities.Pumpkin);
+do_a_flip();
+plant(Entities.Pumpkin);
+do_a_flip();
+do_a_flip();
+do_a_flip();
+do_a_flip();
+harvest();
+@@py docs/unlocks/pyramid.md#0
+# Dig down to find a pyramid foundation
+while get_ground_type() != Grounds.Limestone:
+    dig()
+
+z = get_pos_z() # Remember the depth of the foundation
+
+# Dig away everything that's not part of the pyramid
+for i in range(6):
+    for j in range(6):
+        while (get_ground_type() != Grounds.Limestone
+                and get_ground_type() != Grounds.Sand
+                and get_pos_z() > z):
+            dig()
+        move(North)
+    move(East)
+@@js
+// Dig down to find a pyramid foundation
+while (get_ground_type() != Grounds.Limestone) {
+    dig();
+}
+
+let z = get_pos_z(); // Remember the depth of the foundation
+
+// Dig away everything that's not part of the pyramid
+for (const i of range(6)) {
+    for (const j of range(6)) {
+        while (get_ground_type() != Grounds.Limestone
+                && get_ground_type() != Grounds.Sand
+                && get_pos_z() > z) {
+            dig();
+        }
+        move(North);
+    }
+    move(East);
+}
+@@py docs/unlocks/pyramid.md#1
+# We need a limestone foundation to put sand on
+for i in range(3):
+    for j in range(3):
+        place(Grounds.Limestone)
+        move(North)
+    move(East)
+
+# Put a 3x3 layer of sand on the limestone
+for i in range(3):
+    for j in range(3):
+        place(Grounds.Sand)
+        move(North)
+    move(East)
+
+# Try to put another 3x3 layer
+# Note that only the middle block is supported and remains
+for i in range(3):
+    for j in range(3):
+        place(Grounds.Sand)
+        move(North)
+    move(East)
+@@js
+// We need a limestone foundation to put sand on
+for (const i of range(3)) {
+    for (const j of range(3)) {
+        place(Grounds.Limestone);
+        move(North);
+    }
+    move(East);
+}
+
+// Put a 3x3 layer of sand on the limestone
+for (const i of range(3)) {
+    for (const j of range(3)) {
+        place(Grounds.Sand);
+        move(North);
+    }
+    move(East);
+}
+
+// Try to put another 3x3 layer
+// Note that only the middle block is supported and remains
+for (const i of range(3)) {
+    for (const j of range(3)) {
+        place(Grounds.Sand);
+        move(North);
+    }
+    move(East);
+}
+@@py docs/unlocks/quartz.md#0
+# Dig down to the rock layer
+while get_ground_type() != Grounds.Rock:
+    dig()
+
+# Continue digging until a quartz vein is close
+while prospect_quartz() == None or prospect_quartz() >= 2:
+    for i in range(10):
+        dig()
+
+# Print the final distance to the vein
+print(prospect_quartz())
+@@js
+// Dig down to the rock layer
+while (get_ground_type() != Grounds.Rock) {
+    dig();
+}
+
+// Continue digging until a quartz vein is close
+while (prospect_quartz() == null || prospect_quartz() >= 2) {
+    for (const i of range(10)) {
+        dig();
+    }
+}
+
+// Print the final distance to the vein
+print(prospect_quartz());
+@@py docs/unlocks/rice.md#0
+while get_ground_type() != Grounds.Clay:
+    dig()
+plant(Entities.Rice)
+@@js
+while (get_ground_type() != Grounds.Clay) {
+    dig();
+}
+plant(Entities.Rice);
+@@py docs/unlocks/senses.md#0
+print("x =", get_pos_x(), "y =", get_pos_y())
+if get_pos_x() == 1 and get_pos_y() == 0:
+    do_a_flip()
+@@js
+print("x =", get_pos_x(), "y =", get_pos_y());
+if (get_pos_x() == 1 && get_pos_y() == 0) {
+    do_a_flip();
+}
+@@py docs/unlocks/senses.md#1
+print(num_items(Items.Hay))
+@@js
+print(num_items(Items.Hay));
+@@py docs/unlocks/senses.md#2
+print(get_entity_type())
+if get_entity_type() == Entities.Bush:
+	do_a_flip()
+
+print(get_ground_type())
+if get_ground_type() != Grounds.Soil:
+	do_a_flip()
+@@js
+print(get_entity_type());
+if (get_entity_type() == Entities.Bush) {
+    do_a_flip();
+}
+
+print(get_ground_type());
+if (get_ground_type() != Grounds.Soil) {
+    do_a_flip();
+}
+@@py docs/unlocks/speed.md#0
+if can_harvest():
+	do_a_flip()
+@@js
+if (can_harvest()) {
+    do_a_flip();
+}
+@@py docs/unlocks/sunflowers.md#0
+for _ in range(5):
+    till()
+    plant(Entities.Sunflower)
+    print(measure())
+    move(East)
+for _ in range(5):
+    while not can_harvest():
+        pass
+    harvest()
+    move(East)
+@@js
+for (const _ of range(5)) {
+    till();
+    plant(Entities.Sunflower);
+    print(measure());
+    move(East);
+}
+for (const _ of range(5)) {
+    while (!can_harvest()) {
+    }
+    harvest();
+    move(East);
+}
+@@py docs/unlocks/timing.md#0
+start_time, start_ticks = get_time(), get_tick_count()
+harvest()
+time, ticks = get_time(), get_tick_count()
+quick_print(time - start_time, ticks - start_ticks)
+@@js
+let start_time = get_time();
+let start_ticks = get_tick_count();
+harvest();
+let time = get_time();
+let ticks = get_tick_count();
+quick_print(time - start_time, ticks - start_ticks);
+@@py docs/unlocks/treasure_map.md#0
+# Find the basalt layer
+while get_ground_type() != Grounds.Basalt:
+    dig()
+
+# Measuring the basalt returns the position of the treasure map
+map_pos = measure()
+
+while get_pos_x() < map_pos[0]:
+    move(East)
+while get_pos_y() < map_pos[1]:
+    move(North)
+
+while get_ground_type() != Grounds.Treasure_Map:
+    dig()
+
+# Found the map, measure it to get the path
+do_a_flip()
+instructions = measure()
+print("instructions: ", instructions)
+
+# Dig into the map to start the treasure hunt
+dig()
+@@js
+// Find the basalt layer
+while (get_ground_type() != Grounds.Basalt) {
+    dig();
+}
+
+// Measuring the basalt returns the position of the treasure map
+let map_pos = measure();
+
+while (get_pos_x() < map_pos[0]) {
+    move(East);
+}
+while (get_pos_y() < map_pos[1]) {
+    move(North);
+}
+
+while (get_ground_type() != Grounds.Treasure_Map) {
+    dig();
+}
+
+// Found the map, measure it to get the path
+do_a_flip();
+let instructions = measure();
+print("instructions: ", instructions);
+
+// Dig into the map to start the treasure hunt
+dig();
+@@py docs/unlocks/treasure_map.md#1
+# The map instructions are returned as a single string
+instructions = measure()
+# Use for-in to split the string into letters
+for letter in instructions:
+    print(letter)
+@@js
+// The map instructions are returned as a single string
+let instructions = measure();
+// Use for-of to split the string into letters
+for (const letter of instructions) {
+    print(letter);
+}
+@@py docs/unlocks/trees.md#0
+for i in range(get_world_size()):
+	for j in range(get_world_size()):
+		plant(Entities.Tree)
+		move(North)
+	move(East)
+@@js
+for (const i of range(get_world_size())) {
+    for (const j of range(get_world_size())) {
+        plant(Entities.Tree);
+        move(North);
+    }
+    move(East);
+}
+@@py docs/unlocks/trees.md#1
+def is_even(n):
+	return n % 2 == 0
+
+print("is_even(0): ", is_even(0))
+print("is_even(1): ", is_even(1))
+print("is_even(2): ", is_even(2))
+print("is_even(5): ", is_even(5))
+print("is_even(-1): ", is_even(-1))
+print("is_even(x): ", is_even(get_pos_x()))
+@@js
+function is_even(n) {
+    return n % 2 == 0;
+}
+
+print("is_even(0): ", is_even(0));
+print("is_even(1): ", is_even(1));
+print("is_even(2): ", is_even(2));
+print("is_even(5): ", is_even(5));
+print("is_even(-1): ", is_even(-1));
+print("is_even(x): ", is_even(get_pos_x()));
+@@py docs/unlocks/underground_senses.md#0
+print(get_pos_z())
+dig()
+dig()
+dig()
+print(get_pos_z())
+@@js
+print(get_pos_z());
+dig();
+dig();
+dig();
+print(get_pos_z());
+@@py docs/unlocks/underground_senses.md#1
+dig()
+if get_ground_type() == Grounds.Dirt:
+    do_a_flip()
+@@js
+dig();
+if (get_ground_type() == Grounds.Dirt) {
+    do_a_flip();
+}
+@@py docs/unlocks/underground_senses.md#2
+print(get_hardness(), "|", get_stability())
+while get_hardness() == 1:
+    dig()
+
+print(get_hardness(), "|", get_stability())
+while get_hardness() == 2 and get_stability() == 3:
+    dig()
+@@js
+print(get_hardness(), "|", get_stability());
+while (get_hardness() == 1) {
+    dig();
+}
+
+print(get_hardness(), "|", get_stability());
+while (get_hardness() == 2 && get_stability() == 3) {
+    dig();
+}
+@@py docs/unlocks/watering.md#0
+for i in range(5):
+    if i > 0:
+        use_item(Items.Water, i)
+    plant(Entities.Tree)
+    print(get_water())
+    move(East)
+    move(East)
+@@js
+for (const i of range(5)) {
+    if (i > 0) {
+        use_item(Items.Water, i);
+    }
+    plant(Entities.Tree);
+    print(get_water());
+    move(East);
+    move(East);
+}

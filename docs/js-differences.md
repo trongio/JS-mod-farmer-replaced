@@ -16,9 +16,19 @@ The first non-blank line of a file can override the setting for that file:
 - `# @py` makes it Python.
 
 A file keeps its own language when another file imports it, so a `# @py` file can import a
-JavaScript one. The setting only applies to your own files. Docs examples and the game's
-internal code are always Python. Python files with no marker show errors in JavaScript mode,
-so add `# @py` to the ones you want to keep.
+JavaScript one. Python files with no marker show errors in JavaScript mode, so add `# @py` to
+the ones you want to keep.
+
+## What else the setting changes
+
+In JavaScript mode the code the game shows is JavaScript too: docs examples, which also run as
+JavaScript, code in tooltips and error messages, the tech tree's unlock boxes, autocomplete and
+hover text. `print`, `str()` and hover values show `true`, `false` and `null`, in Python files
+as well, because a program can mix files.
+
+This covers English and Georgian. Other display languages get the same wherever their code
+matches the English text. Anything that doesn't match stays Python, and an example that stays
+Python also runs as Python. The game's internal setup code is always Python.
 
 ## Scope
 
@@ -38,6 +48,12 @@ so add `# @py` to the ones you want to keep.
 - **`null` and `undefined` are the same value.**
 - **`%` follows the game's rule,** so `-1 % 3` is `2`, not `-1`.
 - **String escapes are not processed.** `"\n"` is a backslash and an `n`.
+
+## Loops
+
+Docs examples use `for (const i of range(5))`, because `range` is how the game counts and it
+costs the same as the Python loop. `for (let i = 0; i < 5; i++)` works too and costs the same
+as a `while` loop.
 
 ## Methods and names
 
