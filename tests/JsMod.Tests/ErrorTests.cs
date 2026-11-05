@@ -40,6 +40,11 @@ public class ErrorTests
     [InlineData("for (const x in y) { }", "in")]
     [InlineData("1 = x;", "1")]
     [InlineData("y = `a${b}`;", "`a${b}`")]
+    [InlineData("y = a\n  ? b : c;", "?")]
+    [InlineData("y = a\n  ?? b;", "??")]
+    [InlineData("y = a\n  & b;", "&")]
+    [InlineData("a = b\n  = 1;", "=", 1)]
+    [InlineData("f()\n  , g();", ",")]
     public void ReportsErrorAtTheOffendingText(string js, string errorText, int occurrenceIndex = 0)
     {
         var ex = ErrorIn(js);

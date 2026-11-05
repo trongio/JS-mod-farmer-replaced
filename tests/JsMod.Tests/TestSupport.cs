@@ -87,6 +87,23 @@ internal static class TestSupport
         text.Append(')');
     }
 
+    /// <summary>The source text under each node, in tree order. Blink, breakpoints and step mode all read these spans.</summary>
+    public static List<string> Spans(Node node, string source)
+    {
+        var spans = new List<string>();
+        CollectSpans(node, source, spans);
+        return spans;
+    }
+
+    private static void CollectSpans(Node node, string source, List<string> spans)
+    {
+        spans.Add(source.Substring(node.boxedParams.wordStart, node.boxedParams.wordEnd - node.boxedParams.wordStart));
+        foreach (Node slot in node.slots)
+        {
+            CollectSpans(slot, source, spans);
+        }
+    }
+
     /// <summary>Runs a tree in the game's real interpreter with a Simulation that has only what language nodes touch.</summary>
     public sealed class Run
     {
@@ -112,12 +129,12 @@ internal static class TestSupport
         return sim;
     }
 
-    public static Run Execute(Node tree, double opLimit = 1_000_000)
+    public static Run Execute(Node tree, double opLimit = 1_000_000, int maxSteps = 1_000_000)
     {
         // Execution id -1 equals the unset id on nodes, which skips the unlock check that needs Unity.
         var execution = new Execution(FakeSim(), tree, -1);
         ProgramState state = execution.MainState;
-        for (int guard = 0; guard < 1_000_000; guard++)
+        for (int guard = 0; guard < maxSteps; guard++)
         {
             state.PerformExecutionStep(opLimit, out _);
             if (state.currentSideEffect == SideEffect.Error)
@@ -132,9 +149,9 @@ internal static class TestSupport
         return new Run { State = state };
     }
 
-    public static Run RunJs(string js, double opLimit = 1_000_000)
+    public static Run RunJs(string js, double opLimit = 1_000_000, int maxSteps = 1_000_000)
     {
-        return Execute(ParseJs(js).syntaxTree, opLimit);
+        return Execute(ParseJs(js).syntaxTree, opLimit, maxSteps);
     }
 
     public static Run RunPy(string py, double opLimit = 1_000_000)

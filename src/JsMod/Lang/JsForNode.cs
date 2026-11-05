@@ -86,12 +86,13 @@ namespace JsMod.Lang
                 {
                     break;
                 }
+                // Before the update: the update sits on the `for` line, so afterwards step mode would see no line change and never pause here.
+                ErrorsAndBreakpoints(state, execution, depth);
+                yield return 0.0;
                 foreach (double tick in slots[2].Execute(state, execution, depth + 1))
                 {
                     yield return tick;
                 }
-                ErrorsAndBreakpoints(state, execution, depth);
-                yield return 0.0;
             }
             state.ReturnValue = new PyNone();
         }

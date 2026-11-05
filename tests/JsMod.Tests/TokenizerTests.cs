@@ -44,6 +44,18 @@ public class TokenizerTests
     }
 
     [Fact]
+    public void BlockCommentsSpanningLinesKeepTheirNewLineTokens()
+    {
+        string code = "// @js\na /*\n\n*/ b";
+        var lines = JsTokenizer.Tokenize(code).ToList().Where(t => t.type == TokenType.NEW_LINE).Skip(1).ToList();
+        Assert.Equal(3, lines.Count);
+        foreach (var line in lines)
+        {
+            Assert.Equal('\n', code[line.startIndex]);
+        }
+    }
+
+    [Fact]
     public void EveryTokenIsAVerbatimSliceOfTheSource()
     {
         string code = "// @js\nlet a = [1, 'two'] /* c */ ; a[0] += 0x1F; if (a !== null) { f(a); }\n";

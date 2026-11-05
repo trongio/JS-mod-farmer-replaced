@@ -49,7 +49,7 @@ namespace JsMod.Lang
                 {
                     i = AddNewLine(stream, code, i);
                 }
-                else if (char.IsWhiteSpace(c) || c == '﻿')
+                else if (char.IsWhiteSpace(c) || c == '\uFEFF')
                 {
                     i++;
                 }

@@ -41,6 +41,17 @@ namespace JsMod.Lang
             { "--", "-- can only be used as a statement or in a for loop update." },
         };
 
+        // JS only ends a statement at a line break when the next token could not continue it. These tokens always can.
+        // ++ and -- are left out on purpose: JS treats them as starting a new statement after a line break.
+        private static readonly HashSet<string> ExpressionContinuations = new HashSet<string>
+        {
+            ".", "(", "[", "+", "-", "*", "/", "%", "**", "==", "!=", "===", "!==", "<", ">", "<=", ">=", "&&", "||", "in",
+            "=", "+=", "-=", "*=", "/=", "%=", "**=", ",",
+            "?", "??", "?.", "&", "|", "^", "<<", ">>", ">>>"
+        };
+
+        private static readonly HashSet<string> DeclarationContinuations = new HashSet<string> { "=", "," };
+
         private readonly List<Token> tokens;
         private readonly CodeWindow window;
         private readonly HashSet<string> allVars = new HashSet<string>();
@@ -231,7 +242,9 @@ namespace JsMod.Lang
             Token keyword = Next();
             while (true)
             {
+                bool redeclared = Current != null && Current.type == TokenType.IDENTIFIER && scope.Vars.Contains(Current.value);
                 Node pattern = ParseBindingPattern(keyword.value == "const");
+                JoinLineIfContinued(DeclarationContinuations);
                 if (IsPunct("="))
                 {
                     Token eq = Next();
@@ -244,8 +257,9 @@ namespace JsMod.Lang
                 {
                     throw Unexpected(keyword.value == "const" ? "A const needs a value" : "Destructuring needs a value");
                 }
-                else
+                else if (!redeclared)
                 {
+                    // `var x;` keeps the value of an x that already exists, so only a new name starts as undefined.
                     Node value = new LiteralNode(new PyNone(), window, keyword.startIndex, keyword.startIndex + keyword.value.Length);
                     into.Add(new AssignmentNode("=", window, keyword.startIndex, keyword.startIndex + keyword.value.Length) { slots = { pattern, value } });
                 }
@@ -430,6 +444,8 @@ namespace JsMod.Lang
             if (Current != null && Current.type == JsTokenizer.Keyword && (Current.value == "let" || Current.value == "const" || Current.value == "var"))
             {
                 int declStart = pos;
+                var varsBefore = new HashSet<string>(scope.Vars);
+                var constsBefore = new HashSet<string>(scope.Consts);
                 Token decl = Next();
                 Node pattern = ParseBindingPattern(decl.value == "const");
                 if (IsContextual("of"))
@@ -440,7 +456,12 @@ namespace JsMod.Lang
                 {
                     throw Unexpected("for...in is not supported yet. Use for...of instead");
                 }
+                // This was only a look ahead for `of`. Undo it, so the real parse below doesn't see the name as redeclared.
                 pos = declStart;
+                scope.Vars.Clear();
+                scope.Vars.UnionWith(varsBefore);
+                scope.Consts.Clear();
+                scope.Consts.UnionWith(constsBefore);
                 var decls = new List<Node>();
                 ParseDeclarations(decls);
                 init = decls.Count == 1 ? decls[0] : new SequenceNode(window) { slots = decls };
@@ -749,19 +770,7 @@ namespace JsMod.Lang
             Node node = ParseAtom();
             while (true)
             {
-                // A leading dot on the next line continues the expression, as in JS method chains.
-                if (groupDepth == 0 && Current != null && Current.type == TokenType.NEW_LINE)
-                {
-                    int ahead = pos;
-                    while (ahead < tokens.Count && tokens[ahead].type == TokenType.NEW_LINE)
-                    {
-                        ahead++;
-                    }
-                    if (ahead < tokens.Count && tokens[ahead].type == JsTokenizer.Punct && tokens[ahead].value == ".")
-                    {
-                        pos = ahead;
-                    }
-                }
+                JoinLineIfContinued(ExpressionContinuations);
                 if (IsPunct("["))
                 {
                     Token open = Next();
@@ -993,6 +1002,26 @@ namespace JsMod.Lang
             Token token = Next();
             SkipNewLines();
             return token;
+        }
+
+        /// <summary>Moves past line breaks when the next real token continues the current statement, as JS does.</summary>
+        private void JoinLineIfContinued(HashSet<string> continuations)
+        {
+            if (groupDepth > 0 || pos >= tokens.Count || tokens[pos].type != TokenType.NEW_LINE)
+            {
+                return;
+            }
+            int ahead = pos;
+            while (ahead < tokens.Count && tokens[ahead].type == TokenType.NEW_LINE)
+            {
+                ahead++;
+            }
+            if (ahead < tokens.Count
+                && (tokens[ahead].type == JsTokenizer.Punct || tokens[ahead].type == JsTokenizer.Keyword)
+                && continuations.Contains(tokens[ahead].value))
+            {
+                pos = ahead;
+            }
         }
 
         private void SkipNewLines()

@@ -61,8 +61,70 @@ public class ExecutionTests
     [InlineData("while (true) ;")]
     public void EmptyInfiniteLoopsChargeOpsInsteadOfHanging(string js)
     {
-        var run = RunJs(js, opLimit: 500);
+        // Bounded steps, so a loop that stops charging ops fails this test instead of hanging the test run.
+        var run = RunJs(js, opLimit: 500, maxSteps: 1000);
         Assert.True(run.Ops > 500);
+    }
+
+    [Theory]
+    [InlineData("let d = 9\n  - 4;", "d", 5)]
+    [InlineData("let d = 2\n\n  * 4;", "d", 8)]
+    [InlineData("let d = 1 /*\n*/ + 2;", "d", 3)]
+    [InlineData("let a = 1; let d = 2\n++a;", "a", 2)]
+    [InlineData("let a = 1; let d = 2\n++a;", "d", 2)]
+    [InlineData("let d = 0; function f() { return\n7; }\nif (f() == null) { d = 1; }", "d", 1)]
+    public void LineBreaksFollowJsRules(string js, string name, double expected)
+    {
+        Assert.Equal(expected, RunJs(js).Number(name));
+    }
+
+    [Theory]
+    [InlineData("var x = 5; var x;")]
+    [InlineData("let x = 5; let x;")]
+    [InlineData("var x = 5; if (x) { var x; }")]
+    [InlineData("var x = 5; var y, x;")]
+    public void RedeclaringWithoutAValueKeepsTheOldValue(string js)
+    {
+        Assert.Equal(5, RunJs(js).Number("x"));
+    }
+
+    [Fact]
+    public void RedeclaringAParameterWithoutAValueKeepsTheArgument()
+    {
+        Assert.Equal(3, RunJs("function f(p) { var p; return p; }\nlet r = f(3);").Number("r"));
+    }
+
+    [Fact]
+    public void ANewNameWithoutAValueStartsAsUndefined()
+    {
+        Assert.IsType<PyNone>(RunJs("let x;").Value("x"));
+    }
+
+    [Fact]
+    public void AForInitWithoutAValueStartsAsUndefined()
+    {
+        var run = RunJs("let n = 0; for (let i; n < 2; n++) { if (i == null) { i = 7; } }\nlet r = i;");
+        Assert.Equal(7, run.Number("r"));
+    }
+
+    [Fact]
+    public void AnEmptyLoopBodyLeftByARedeclarationStillChargesOps()
+    {
+        var run = RunJs("var x = 1; while (true) { var x; }", opLimit: 500, maxSteps: 1000);
+        Assert.True(run.Ops > 500);
+    }
+
+    [Fact]
+    public void BuiltinNamesCanBeReassignedInBothLanguages()
+    {
+        Assert.Equal(RunPy("harvest = 1").Number("harvest"), RunJs("let harvest = 1;").Number("harvest"));
+    }
+
+    [Fact]
+    public void PythonOnlyKeywordsAreOrdinaryNamesInJs()
+    {
+        Assert.Equal(1, RunJs("let from = 1;").Number("from"));
+        Assert.Equal(2, RunJs("let pass = 2;").Number("pass"));
     }
 
     [Fact]

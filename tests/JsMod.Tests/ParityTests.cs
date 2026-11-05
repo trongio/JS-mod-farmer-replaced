@@ -54,7 +54,31 @@ public class ParityTests
     [InlineData("a.append(1);", "a.append(1)")]
     [InlineData("a\n  .append(1);", "a.append(1)")]
     [InlineData("f(a,\n  b);", "f(a,\n  b)")]
-    [InlineData("y = a +\n  b;", "y = (a + b)")]
+    [InlineData("y = a +\n  b;", "y = a + b")]
+    [InlineData("let d = a\n  - b;", "d = a - b")]
+    [InlineData("y = a\n  + b;", "y = a + b")]
+    [InlineData("y = a\n\n// note\n  * b;", "y = a * b")]
+    [InlineData("y = a\n  && b\n  || c;", "y = a and b or c")]
+    [InlineData("y = a\n  == b;", "y = a == b")]
+    [InlineData("y = a\n  in b;", "y = a in b")]
+    [InlineData("y = a\n  .b;", "y = a.b")]
+    [InlineData("f\n(1);", "f(1)")]
+    [InlineData("a\n[0] = 1;", "a[0] = 1")]
+    [InlineData("x\n  = 1;", "x = 1")]
+    [InlineData("x\n  += 1;", "x += 1")]
+    [InlineData("let x\n  = 1;", "x = 1")]
+    [InlineData("let a = 1\n  , b = 2;", "a = 1\nb = 2")]
+    [InlineData("let x\n(1);", "x = None\n(1)")]
+    [InlineData("x = 1 /*\n*/ + 2;", "x = 1 + 2")]
+    [InlineData("a /*\n*/ b;", "a\nb")]
+    [InlineData("a\n++b;", "a\nb += 1")]
+    [InlineData("a\n--b;", "a\nb -= 1")]
+    [InlineData("y = a\n!b;", "y = a\nnot b")]
+    [InlineData("y = a\nb;", "y = a\nb")]
+    [InlineData("function f() { return\nx; }", "def f():\n    return\n    x")]
+    [InlineData("function f() { return /*\n*/ x; }", "def f():\n    return\n    x")]
+    [InlineData("function f() { return a\n  + b; }", "def f():\n    return a + b")]
+    [InlineData("harvest = 1;", "harvest = 1")]
     [InlineData("y = {a: 1, \"b\": 2};", "y = {\"a\": 1, \"b\": 2}")]
     [InlineData("y = {};", "y = {}")]
     [InlineData("y = true;", "y = True")]
@@ -70,13 +94,22 @@ public class ParityTests
     [InlineData("", "")]
     public void BuildsSameTreeAsPython(string js, string py)
     {
-        string expected = Dump(ParsePy(py).syntaxTree);
-        if (js == "y = a +\n  b;")
-        {
-            // The Python form needs brackets to span lines, so compare with the unbracketed tree instead.
-            expected = Dump(ParsePy("y = a + b").syntaxTree);
-        }
-        Assert.Equal(expected, Dump(ParseJs(js).syntaxTree));
+        Assert.Equal(Dump(ParsePy(py).syntaxTree), Dump(ParseJs(js).syntaxTree));
+    }
+
+    /// <summary>Only for constructs spelled the same in both languages. `def` and `True`, for example, can't match `function` and `true`.</summary>
+    [Theory]
+    [InlineData("while (a) { harvest(); move(North); }", "while a:\n    harvest()\n    move(North)")]
+    [InlineData("if (a) { f(); } else { g(); }", "if a:\n    f()\nelse:\n    g()")]
+    [InlineData("for (const x of y) { f(x); }", "for x in y:\n    f(x)")]
+    [InlineData("x = a + b * c;", "x = a + b * c")]
+    [InlineData("x += 1;", "x += 1")]
+    [InlineData("y = a[0];", "y = a[0]")]
+    [InlineData("y = a.b;", "y = a.b")]
+    [InlineData("y = a < b;", "y = a < b")]
+    public void NodesCoverTheSameSourceTextAsPython(string js, string py)
+    {
+        Assert.Equal(Spans(ParsePy(py).syntaxTree, py), Spans(ParseJs(js).syntaxTree, Marker + js));
     }
 
     [Fact]

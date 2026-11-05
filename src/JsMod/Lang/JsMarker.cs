@@ -12,7 +12,7 @@ namespace JsMod.Lang
                 return false;
             }
             int i = 0;
-            while (i < code.Length && (char.IsWhiteSpace(code[i]) || code[i] == '﻿'))
+            while (i < code.Length && (char.IsWhiteSpace(code[i]) || code[i] == '\uFEFF'))
             {
                 i++;
             }
