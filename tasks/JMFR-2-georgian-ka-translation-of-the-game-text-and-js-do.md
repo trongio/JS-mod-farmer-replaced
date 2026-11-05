@@ -29,7 +29,7 @@ Georgian (KA) as a selectable game language, with prose in Georgian and all code
 - [x] In game: docs windows show English, not blank
 - [ ] In game: Georgian runtime error messages, inventory and tech tree tooltips checked
 - [ ] Owner has reviewed the glossary
-- [ ] Stage 2: docs translated (26k words)
+- [x] Stage 2: docs translated (26k words) and shown in game
 
 ## Notes
 
